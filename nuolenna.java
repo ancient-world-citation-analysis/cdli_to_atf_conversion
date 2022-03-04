@@ -42,15 +42,48 @@ class nuolenna {
 			reader = new BufferedReader(new FileReader(file));
 			
 			String line = "";
-			
 			while ((line = reader.readLine()) != null) {
+//				Print out the line with the TEXT ID
+				line = line.trim();
+				if (line.matches("&P\\d{6}.*")) {
+					System.out.println(line);
+					continue;
+				}
+//				Print out following lines
+//				@ = indicates position of text on tablet, i.e "@column", "@reverse"
+// 				$ = gives useful information that we want to print, i.e "$ beginning broken"
+// 				# = when at beginning of line, indicates language, i.e #atf: lang sux
+// 				>> = corresponds to a seal that reflects a name on the tablet
+
+				if (line.startsWith("@") || line.startsWith("$") || line.startsWith("#") || line.startsWith(">>")) {
+					System.out.println(line);
+					continue;
+				}
+//				Print line number
+				if (line.matches("\\d+.*\\..*")) {
+					System.out.print(line.split(" ")[0]);
+				}
 // Logograms are written in capitals, but the signs are the same
-				line = line.toLowerCase();
-				
 				String[] sanat = line.split(" ");
 				for (String sana : sanat) {
 // REPETITION '(' GRAPHEME ')'
-					if (sana.matches("^[1-90][1-90]*\\(.*\\)$")) {
+//					Made some modifications here, added the "&& !cuneiMap.containsKey(sana)" to check
+//					if the number is in the sign list as it is. Also accounted for possible square or curly
+//					brackets, i.e [1(n01] so that they can be printed in brackets.
+					if ((sana.matches("^[1-90][1-90]*\\(.*\\)$") && !cuneiMap.containsKey(sana)) ||
+							sana.matches("^\\[[1-90][1-90]*\\(.*\\)\\]$")) {
+						boolean square = false;
+						boolean curly = false;
+						if (sana.matches("\\[.*\\]")) {
+							square = true;
+						}
+						if (sana.matches("\\{.*\\}")) {
+							curly = true;
+						}
+						sana = sana.replaceAll("\\{", "");
+						sana = sana.replaceAll("\\}", "");
+						sana = sana.replaceAll("\\[", "");
+						sana = sana.replaceAll("\\]", "");
 						String merkki = sana.replaceAll("^[1-90][1-90]*\\(", "");
 						merkki = merkki.replaceAll("\\)$", "");
 						int maara = Integer.valueOf(sana.replaceAll("\\(.*$", ""));
@@ -59,6 +92,12 @@ class nuolenna {
 							sana = sana + " " + merkki;
 							maara = maara - 1;
 						}
+						if (square) {
+							sana = "[" + sana + "]";
+						}
+						if (curly) {
+							sana = "{" + sana + "}";
+						}
 					}
 // $-sign means that the reading is uncertain (the sign is still certain) so we just remove all dollar signs
 					sana = sana.replaceAll("[\\$]", "");
@@ -66,7 +105,7 @@ class nuolenna {
 					sana = sana.replaceAll("gad\\&gad\\.gar\\&gar", "kinda");
 					sana = sana.replaceAll("bu\\&bu\\.ab", "sirsir");
 					sana = sana.replaceAll("tur\\&tur\\.za\\&za", "zizna");
-					sana = sana.replaceAll("še\\&še\\.tab\\&tab.gar\\&gar", "garadin₃");
+					sana = sana.replaceAll("še\\&še\\.tab\\&tab.gar\\&gar", "garadin3");
 // "Signs which have the special subscript ₓ must be qualified in ATF by placing the sign name in parentheses immediately after the sign value"
 // http://oracc.museum.upenn.edu/doc/help/editinginatf/primer/inlinetutorial/index.html
 					if (sana.matches(".*[\\.-][^\\.-]*ₓ\\(.*\\).*")) {
@@ -114,11 +153,15 @@ class nuolenna {
 					sana = sana.replaceAll("\\{\\+", " ");
 // joining characters are combined by + sign, we separate joining chars by replacing with whitespace
 					sana = sana.replaceAll("\\+", " ");
-					sana = sana.replaceAll("[-{}]", " ");
+
+//	For now we would like to preserve curly brackets, so I commented this out.
+//					sana = sana.replaceAll("[-{}]", " ");
 // LAGAŠ = ŠIR.BUR.LA
 					sana = sana.replaceAll("lagaš ", "šir bur la ");
 
 					sana = sana.replaceAll("  *", " ");
+
+
 
 					String[] tavut = sana.split(" ");
 					for (String tavu : tavut) {
@@ -127,8 +170,14 @@ class nuolenna {
 						if (tavu.matches(".*@[19cghknrstvz]")) {
 							tavu = tavu.replaceAll("@.*", "");
 						}
-						if (tavu.matches(".*~[abcdefptyv][1234dgpt]?p?")) {
-							tavu = tavu.replaceAll("~.*", "");
+//	Commenting this out to make some modifications that will allow it to preserve important symbols
+//	at the end of translitertaions, e.g. "#", "*"
+
+//						if (tavu.matches(".*~[abcdefptyv][1234dgpt]?p?")) {
+//							tavu = tavu.replaceAll("~.*", "");
+//						}
+						if (tavu.matches(".*~[abcdefptyv][1234dgpt]?p?.*")) {
+							tavu = tavu.replaceAll("~[abcdefptyv][1234dgpt]?p?", "");
 						}
 // All numbers to one
 						if (tavu.matches("n[1-90][1-90]*") || tavu.matches("[1-90][1-90]*")) {
@@ -138,9 +187,42 @@ class nuolenna {
 						if (tavu.equals("1/2(iku)") || tavu.equals("1/4(iku)")) {
 							tavu = "";
 						}
-						
-						tavu = tavu.replaceAll("[\\(\\)]", "");
-						if (cuneiMap.containsKey(tavu)) {
+						tavu = tavu.toLowerCase().trim();
+//						tavu = tavu.replaceAll("[\\(\\)]", "");
+//						Collation, uncertainty and remarkability are flagged by *, ? and ! respectively
+						if (tavu.matches(".*#")) {
+							tavu = tavu.replaceAll("#", "");
+							if (cuneiMap.containsKey(tavu)) {
+								System.out.print(cuneiMap.get(tavu) + "#");
+							}
+						}
+						else if (tavu.matches(".*\\*")) {
+							tavu = tavu.replaceAll("\\*", "");
+							if (cuneiMap.containsKey(tavu)) {
+								System.out.print(cuneiMap.get(tavu) + "*");
+							}
+						}
+						else if (tavu.matches(".*!")) {
+							tavu = tavu.replaceAll("!", "");
+							if (cuneiMap.containsKey(tavu)) {
+								System.out.print(cuneiMap.get(tavu) + "!");
+							}
+						}
+						else if (tavu.matches("\\{.*\\}")) {
+							tavu = tavu.replaceAll("\\{", "");
+							tavu = tavu.replaceAll("\\}", "");
+							if (cuneiMap.containsKey(tavu)) {
+								System.out.print("{" + cuneiMap.get(tavu) + "}");
+							}
+						}
+						else if (tavu.matches("\\[.*\\]")) {
+							tavu = tavu.replaceAll("\\[", "");
+							tavu = tavu.replaceAll("]", "");
+							if (cuneiMap.containsKey(tavu)) {
+								System.out.print("[" + cuneiMap.get(tavu) + "]");
+							}
+						}
+						else if (cuneiMap.containsKey(tavu)) {
 							System.out.print(cuneiMap.get(tavu));
 						}
 						else if ((tavu.contains("×") || tavu.contains(".")) && !tavu.contains("&")) {
@@ -183,7 +265,25 @@ class nuolenna {
 				nuolenpaa = nuolenpaa.replaceAll("x", "");
 				nuolenpaa = nuolenpaa.replaceAll("X", "");
 				nuolenpaa = nuolenpaa.replaceAll("\\.", "");
+
+// We make substitutions to conform to our desired format(convert subscripts to integers, replace accents)
+				translitteraatio = translitteraatio.replaceAll("š", "sz");
+				translitteraatio = translitteraatio.replaceAll("ṭ", "t,");
+				translitteraatio = translitteraatio.replaceAll("ṣ", "s,");
+				translitteraatio = translitteraatio.replaceAll("ŋ", "g");
+				translitteraatio = translitteraatio.replaceAll("ḫ", "h,");
+				translitteraatio = translitteraatio.replaceAll("₁", "1");
+				translitteraatio = translitteraatio.replaceAll("₂", "2");
+				translitteraatio = translitteraatio.replaceAll("₃", "3");
+				translitteraatio = translitteraatio.replaceAll("₄", "4");
+				translitteraatio = translitteraatio.replaceAll("₅", "5");
+				translitteraatio = translitteraatio.replaceAll("₆", "6");
+				translitteraatio = translitteraatio.replaceAll("₇", "7");
+				translitteraatio = translitteraatio.replaceAll("₈", "8");
+				translitteraatio = translitteraatio.replaceAll("₉", "9");
+
 // we add to cuneimap only if there is a transliteration
+
 				if (translitteraatio.length() > 0) {
 					cuneiMap.put(translitteraatio, nuolenpaa);
 				}
