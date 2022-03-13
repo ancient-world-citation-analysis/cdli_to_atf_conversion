@@ -18,6 +18,8 @@
 
 import java.util.*;
 import java.io.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class nuolenna {
 
@@ -61,7 +63,9 @@ class nuolenna {
 				}
 //				Print line number
 				if (line.matches("\\d+.*\\..*")) {
+
 					System.out.print(line.split(" ")[0]);
+					line = line.replaceAll("^[\\S]+", "");
 				}
 // Logograms are written in capitals, but the signs are the same
 				String[] sanat = line.split(" ");
@@ -70,20 +74,30 @@ class nuolenna {
 //					Made some modifications here, added the "&& !cuneiMap.containsKey(sana)" to check
 //					if the number is in the sign list as it is. Also accounted for possible square or curly
 //					brackets, i.e [1(n01] so that they can be printed in brackets.
-					if ((sana.matches("^[1-90][1-90]*\\(.*\\)$") && !cuneiMap.containsKey(sana)) ||
-							sana.matches("^\\[[1-90][1-90]*\\(.*\\)\\]$")) {
+					if ((sana.matches("^[1-90][1-90]*\\(.*\\).*$") && !cuneiMap.containsKey(sana)) ||
+							sana.matches("^[\\[\\{\\<][1-90][1-90]*\\(.*\\).*[\\]\\}\\>]$")) {
 						boolean square = false;
 						boolean curly = false;
+						boolean sign = false;
 						if (sana.matches("\\[.*\\]")) {
 							square = true;
 						}
 						if (sana.matches("\\{.*\\}")) {
 							curly = true;
 						}
+						if (sana.matches("\\<.*\\>")) {
+							sign = true;
+						}
 						sana = sana.replaceAll("\\{", "");
 						sana = sana.replaceAll("\\}", "");
 						sana = sana.replaceAll("\\[", "");
 						sana = sana.replaceAll("\\]", "");
+						sana = sana.replaceAll("\\<", "");
+						sana = sana.replaceAll("\\>", "");
+						String ending = handleChar(sana);
+						if (!ending.isEmpty()) {
+							sana = sana.replaceAll(String.format("\\%s",ending), "");
+						}
 						String merkki = sana.replaceAll("^[1-90][1-90]*\\(", "");
 						merkki = merkki.replaceAll("\\)$", "");
 						int maara = Integer.valueOf(sana.replaceAll("\\(.*$", ""));
@@ -98,6 +112,10 @@ class nuolenna {
 						if (curly) {
 							sana = "{" + sana + "}";
 						}
+						if (sign) {
+							sana = "<" + sana + ">";
+						}
+						sana += ending;
 					}
 // $-sign means that the reading is uncertain (the sign is still certain) so we just remove all dollar signs
 					sana = sana.replaceAll("[\\$]", "");
@@ -131,19 +149,22 @@ class nuolenna {
 							sana = sana.replaceAll("(.*\\|[^\\|]*\\|)(\\(.*\\))(.*)", "$1$3");
 						}
 					}
+
 // then we remove the more general case
-					if (sana.matches(".*[\\.-][^\\.-]*[^\\|\\&]\\(.*\\).*")) {
-						while (sana.matches(".*[\\.-][^\\.-]*[^\\|\\&]\\(.*\\).*")) {
-							sana = sana.replaceAll("(.*[\\.-][^\\.-]*[^\\|\\&])(\\(.*\\))(.*)", "$1$3");
-						}
-					}
-					if (sana.matches(".*[^\\|\\&]\\(.*\\).*")) {
-						while (sana.matches(".*[^\\|\\&]\\([^\\(\\)]*\\).*")) {
-							sana = sana.replaceAll("(.*[^\\|\\&])(\\([^\\(\\)]*\\))(.*)","$1$3");
-						}
-					}
+//					if (sana.matches(".*[\\.-][^\\.-]*[^\\|\\&]\\(.*\\).*")) {
+//						while (sana.matches(".*[\\.-][^\\.-]*[^\\|\\&]\\(.*\\).*")) {
+//							sana = sana.replaceAll("(.*[\\.-][^\\.-]*[^\\|\\&])(\\(.*\\))(.*)", "$1$3");
+//						}
+//					}
+//					if (sana.matches(".*[^\\|\\&]\\(.*\\).*")) {
+//						while (sana.matches(".*[^\\|\\&]\\([^\\(\\)]*\\).*")) {
+//							sana = sana.replaceAll("(.*[^\\|\\&])(\\([^\\(\\)]*\\))(.*)","$1$3");
+//						}
+//					}
 // combination characters are inside pipes, but they are indicated also by combining markers, so we check markers and remove pipes
-					sana = sana.replaceAll("\\|", "");
+					if (!cuneiMap.containsKey(sana)) {
+						sana = sana.replaceAll("\\|", "");
+					}
 // Logograms separated internally by dots (e.g., GIR₂.TAB). If they are inside (...) they are not removed yet.
 					if (!sana.matches(".*\\(.*\\..*\\).*")) {
 						sana = sana.replaceAll("[.]", " ");
@@ -157,18 +178,28 @@ class nuolenna {
 //	For now we would like to preserve curly brackets, so I commented this out.
 //					sana = sana.replaceAll("[-{}]", " ");
 // LAGAŠ = ŠIR.BUR.LA
+					sana = sana.replaceAll("-", " ");
 					sana = sana.replaceAll("lagaš ", "šir bur la ");
+					sana = sana.replaceAll("\\w\\{", " ");
+					
 
-					sana = sana.replaceAll("  *", " ");
+
 
 
 
 					String[] tavut = sana.split(" ");
+					for (String tav : tavut) {
+						tav = tav.trim();
+					}
 					for (String tavu : tavut) {
 
 // After the characters @ and ~ there is some annotation which should no affect cuneifying, so we just remove it.
-						if (tavu.matches(".*@[19cghknrstvz]")) {
+						if (tavu.matches(".*@[19cghknrstvz].*")) {
+							String ending = handleChar(tavu);
 							tavu = tavu.replaceAll("@.*", "");
+							if (!ending.isEmpty()) {
+								tavu = tavu + ending;
+							}
 						}
 //	Commenting this out to make some modifications that will allow it to preserve important symbols
 //	at the end of translitertaions, e.g. "#", "*"
@@ -189,41 +220,24 @@ class nuolenna {
 						}
 						tavu = tavu.toLowerCase().trim();
 //						tavu = tavu.replaceAll("[\\(\\)]", "");
-//						Collation, uncertainty and remarkability are flagged by *, ? and ! respectively
-						if (tavu.matches(".*#")) {
-							tavu = tavu.replaceAll("#", "");
-							if (cuneiMap.containsKey(tavu)) {
-								System.out.print(cuneiMap.get(tavu) + "#");
+						tavu = tavu.replaceAll("_", "");
+
+						if (tavu.matches("\\A[\\{\\[\\< ]+.*") || tavu.matches(".*[ \\}\\]\\>]+\\z")) {
+							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> ]*)\\z");
+							Matcher match = checkParentheses.matcher(tavu);
+							if (match.find()) {
+								parentheses(match.group(1), match.group(2), tavu);
+							}
+
+						}
+						String ending = handleChar(tavu);
+						if (!ending.isEmpty()) {
+							for (String symbol : ending.split("")) {
+								tavu = tavu.replace(symbol, "");
 							}
 						}
-						else if (tavu.matches(".*\\*")) {
-							tavu = tavu.replaceAll("\\*", "");
-							if (cuneiMap.containsKey(tavu)) {
-								System.out.print(cuneiMap.get(tavu) + "*");
-							}
-						}
-						else if (tavu.matches(".*!")) {
-							tavu = tavu.replaceAll("!", "");
-							if (cuneiMap.containsKey(tavu)) {
-								System.out.print(cuneiMap.get(tavu) + "!");
-							}
-						}
-						else if (tavu.matches("\\{.*\\}")) {
-							tavu = tavu.replaceAll("\\{", "");
-							tavu = tavu.replaceAll("\\}", "");
-							if (cuneiMap.containsKey(tavu)) {
-								System.out.print("{" + cuneiMap.get(tavu) + "}");
-							}
-						}
-						else if (tavu.matches("\\[.*\\]")) {
-							tavu = tavu.replaceAll("\\[", "");
-							tavu = tavu.replaceAll("]", "");
-							if (cuneiMap.containsKey(tavu)) {
-								System.out.print("[" + cuneiMap.get(tavu) + "]");
-							}
-						}
-						else if (cuneiMap.containsKey(tavu)) {
-							System.out.print(cuneiMap.get(tavu));
+						if (cuneiMap.containsKey(tavu)) {
+							System.out.print(cuneiMap.get(tavu) + ending);
 						}
 						else if ((tavu.contains("×") || tavu.contains(".")) && !tavu.contains("&")) {
 							tavu = tavu.replaceAll("[\\.]", "×");
@@ -294,5 +308,59 @@ class nuolenna {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	private static void parentheses(String char1, String char2, String tavu) {
+//		boolean front = false;
+//		boolean end = false;
+//		boolean both = false;
+//		String thing = String.format(".*\\%s", char2);
+//		if (tavu.matches(String.format("\\%s.*", char1)) && tavu.matches(String.format(".*\\%s", char2))) {
+//			both = true;
+//		}
+//		else if (tavu.matches(String.format("\\%s.*", char1)) && !tavu.matches(String.format(".*\\%s", char2))) {
+//			front = true;
+//		}
+//		else {
+//			end = true;
+//		}
+//		tavu = tavu.replaceAll(String.format("\\%s", char1), "");
+//		tavu = tavu.replaceAll(String.format("\\%s", char2), "");
+
+		tavu = tavu.replace(char1, "");
+		tavu = tavu.replace(char2, "");
+		String ending = handleChar(tavu);
+		if (!ending.isEmpty()) {
+			tavu = tavu.replace(ending, "");
+		}
+		if (cuneiMap.containsKey(tavu)) {
+			System.out.print(char1 + cuneiMap.get(tavu) + ending + char2);
+//			if (both) {
+//				System.out.print(char1 + cuneiMap.get(tavu) + ending + char2);
+//			}
+//			else if (front) {
+//				System.out.print(char1 + cuneiMap.get(tavu) + ending);
+//			}
+//			else if (end) {
+//				System.out.print(cuneiMap.get(tavu) + ending + char2);
+//			}
+
+		}
+	}
+//	This function checks if the string passed in has any important characters at the end
+//	such as !, ?, and # and returns a string containing all of these characters if it does
+	private static String handleChar(String tavu) {
+		String ending = "";
+		for (int i = 0; i < tavu.length(); i++) {
+			if (tavu.charAt(i) == '!') {
+				ending += '!';
+			}
+			if (tavu.charAt(i) == '#') {
+				ending += '#';
+			}
+			if (tavu.charAt(i) == '?') {
+				ending += '?';
+			}
+		}
+		return ending;
 	}
 }
