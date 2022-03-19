@@ -74,6 +74,8 @@ class nuolenna {
 //					Made some modifications here, added the "&& !cuneiMap.containsKey(sana)" to check
 //					if the number is in the sign list as it is. Also accounted for possible square or curly
 //					brackets, i.e [1(n01] so that they can be printed in brackets.
+					sana = sana.replace("_", "");
+					sana = sana.replace(":", " ");
 					if ((sana.matches("^[1-90][1-90]*\\(.*\\).*$") && !cuneiMap.containsKey(sana)) ||
 							sana.matches("^[\\[\\{\\<][1-90][1-90]*\\(.*\\).*[\\]\\}\\>]$")) {
 						boolean square = false;
@@ -96,7 +98,7 @@ class nuolenna {
 						sana = sana.replaceAll("\\>", "");
 						String ending = handleChar(sana);
 						if (!ending.isEmpty()) {
-							sana = sana.replaceAll(String.format("\\%s",ending), "");
+							sana = sana.replace(ending, "");
 						}
 						String merkki = sana.replaceAll("^[1-90][1-90]*\\(", "");
 						merkki = merkki.replaceAll("\\)$", "");
@@ -118,6 +120,7 @@ class nuolenna {
 						sana += ending;
 					}
 // $-sign means that the reading is uncertain (the sign is still certain) so we just remove all dollar signs
+					sana = sana.replace("'", " ");
 					sana = sana.replaceAll("[\\$]", "");
 // some complicated combination characters have their own sign in UTF, transformations here before removing pipes
 					sana = sana.replaceAll("gad\\&gad\\.gar\\&gar", "kinda");
@@ -179,22 +182,20 @@ class nuolenna {
 //					sana = sana.replaceAll("[-{}]", " ");
 // LAGAŠ = ŠIR.BUR.LA
 					sana = sana.replaceAll("-", " ");
-					sana = sana.replaceAll("lagaš ", "šir bur la ");
-					sana = sana.replaceAll("\\w\\{", " ");
-					
+					sana = sana.replaceAll("lagasz ", "šir bur la ");
+					sana = sana.replaceAll("(\\w+)([\\[\\{\\<])", "$1 $2");
+					sana = sana.replaceAll("([\\]\\}\\>])(\\w+)", "$1 $2");
 
-
-
-
+					sana = sana.replace("x", "");
 
 					String[] tavut = sana.split(" ");
 					for (String tav : tavut) {
 						tav = tav.trim();
 					}
 					for (String tavu : tavut) {
-
+						tavu = tavu.toLowerCase().trim();
 // After the characters @ and ~ there is some annotation which should no affect cuneifying, so we just remove it.
-						if (tavu.matches(".*@[19cghknrstvz].*")) {
+						if (tavu.matches(".*@[19cghknrstvz].*") && !cuneiMap.containsKey(tavu)) {
 							String ending = handleChar(tavu);
 							tavu = tavu.replaceAll("@.*", "");
 							if (!ending.isEmpty()) {
@@ -218,7 +219,7 @@ class nuolenna {
 						if (tavu.equals("1/2(iku)") || tavu.equals("1/4(iku)")) {
 							tavu = "";
 						}
-						tavu = tavu.toLowerCase().trim();
+
 //						tavu = tavu.replaceAll("[\\(\\)]", "");
 						tavu = tavu.replaceAll("_", "");
 
@@ -309,22 +310,10 @@ class nuolenna {
 			e.printStackTrace();
 		}
 	}
+
+//	Checks if the sybmol contains any parentheses around it. If it does, then print the symbol
+//	with the appropriate parentheses.
 	private static void parentheses(String char1, String char2, String tavu) {
-//		boolean front = false;
-//		boolean end = false;
-//		boolean both = false;
-//		String thing = String.format(".*\\%s", char2);
-//		if (tavu.matches(String.format("\\%s.*", char1)) && tavu.matches(String.format(".*\\%s", char2))) {
-//			both = true;
-//		}
-//		else if (tavu.matches(String.format("\\%s.*", char1)) && !tavu.matches(String.format(".*\\%s", char2))) {
-//			front = true;
-//		}
-//		else {
-//			end = true;
-//		}
-//		tavu = tavu.replaceAll(String.format("\\%s", char1), "");
-//		tavu = tavu.replaceAll(String.format("\\%s", char2), "");
 
 		tavu = tavu.replace(char1, "");
 		tavu = tavu.replace(char2, "");
@@ -334,16 +323,6 @@ class nuolenna {
 		}
 		if (cuneiMap.containsKey(tavu)) {
 			System.out.print(char1 + cuneiMap.get(tavu) + ending + char2);
-//			if (both) {
-//				System.out.print(char1 + cuneiMap.get(tavu) + ending + char2);
-//			}
-//			else if (front) {
-//				System.out.print(char1 + cuneiMap.get(tavu) + ending);
-//			}
-//			else if (end) {
-//				System.out.print(cuneiMap.get(tavu) + ending + char2);
-//			}
-
 		}
 	}
 //	This function checks if the string passed in has any important characters at the end
