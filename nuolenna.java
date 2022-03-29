@@ -57,7 +57,8 @@ class nuolenna {
 // 				# = when at beginning of line, indicates language, i.e #atf: lang sux
 // 				>> = corresponds to a seal that reflects a name on the tablet
 
-				if (line.startsWith("@") || line.startsWith("$") || line.startsWith("#") || line.startsWith(">>")) {
+				if (line.startsWith("@") || line.startsWith("$") || line.startsWith("#") || line.startsWith(">>")
+						|| line.startsWith("||")) {
 					System.out.println(line);
 					continue;
 				}
@@ -76,52 +77,40 @@ class nuolenna {
 //					brackets, i.e [1(n01] so that they can be printed in brackets.
 					sana = sana.replace("_", "");
 					sana = sana.replace(":", " ");
+					sana = sana.toLowerCase();
+
+//					Strips sana of all special characters and parntheses to check if there is a key for it in the hashmap.
+					String check = sana.replaceAll("[\\[\\{\\<\\]\\}\\>\\!\\?\\#]", "");
+
 					if ((sana.matches("^[1-90][1-90]*\\(.*\\).*$") && !cuneiMap.containsKey(sana)) ||
-							sana.matches("^[\\[\\{\\<][1-90][1-90]*\\(.*\\).*[\\]\\}\\>]$")) {
-						boolean square = false;
-						boolean curly = false;
-						boolean sign = false;
-						if (sana.matches("\\[.*\\]")) {
-							square = true;
+							sana.matches("^[\\[\\{\\<]+[1-90][1-90]*\\(.*\\).*[\\]\\}\\>]+$") && !cuneiMap.containsKey(check)) {
+						Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> ]*)\\z");
+						Matcher match = checkParentheses.matcher(sana);
+						if (match.find()) {
+							String left = match.group(1);
+							String right = match.group(2);
+							sana = sana.replace(left, "");
+							sana = sana.replace(right, "");
+							String ending = handleChar(sana);
+							if (!ending.isEmpty()) {
+								sana = sana.replace(ending, "");
+							}
+							String merkki = sana.replaceAll("^[1-90][1-90]*\\(", "");
+							merkki = merkki.replaceAll("\\)$", "");
+							int maara = Integer.valueOf(sana.replaceAll("\\(.*$", ""));
+							sana = merkki;
+							while (maara > 1) {
+								sana = sana + " " + merkki;
+								maara = maara - 1;
+							}
+							sana = left + sana + ending + right;
 						}
-						if (sana.matches("\\{.*\\}")) {
-							curly = true;
-						}
-						if (sana.matches("\\<.*\\>")) {
-							sign = true;
-						}
-						sana = sana.replaceAll("\\{", "");
-						sana = sana.replaceAll("\\}", "");
-						sana = sana.replaceAll("\\[", "");
-						sana = sana.replaceAll("\\]", "");
-						sana = sana.replaceAll("\\<", "");
-						sana = sana.replaceAll("\\>", "");
-						String ending = handleChar(sana);
-						if (!ending.isEmpty()) {
-							sana = sana.replace(ending, "");
-						}
-						String merkki = sana.replaceAll("^[1-90][1-90]*\\(", "");
-						merkki = merkki.replaceAll("\\)$", "");
-						int maara = Integer.valueOf(sana.replaceAll("\\(.*$", ""));
-						sana = merkki;
-						while (maara > 1) {
-							sana = sana + " " + merkki;
-							maara = maara - 1;
-						}
-						if (square) {
-							sana = "[" + sana + "]";
-						}
-						if (curly) {
-							sana = "{" + sana + "}";
-						}
-						if (sign) {
-							sana = "<" + sana + ">";
-						}
-						sana += ending;
 					}
 // $-sign means that the reading is uncertain (the sign is still certain) so we just remove all dollar signs
 					sana = sana.replace("'", " ");
 					sana = sana.replaceAll("[\\$]", "");
+					sana = sana.replace("x", "");
+					sana = sana.toLowerCase();
 // some complicated combination characters have their own sign in UTF, transformations here before removing pipes
 					sana = sana.replaceAll("gad\\&gad\\.gar\\&gar", "kinda");
 					sana = sana.replaceAll("bu\\&bu\\.ab", "sirsir");
@@ -195,7 +184,8 @@ class nuolenna {
 					for (String tavu : tavut) {
 						tavu = tavu.toLowerCase().trim();
 // After the characters @ and ~ there is some annotation which should no affect cuneifying, so we just remove it.
-						if (tavu.matches(".*@[19cghknrstvz].*") && !cuneiMap.containsKey(tavu)) {
+						if (tavu.matches(".*@[19cghknrstvz].*") && !cuneiMap.containsKey(tavu) &&
+						!cuneiMap.containsKey(check)) {
 							String ending = handleChar(tavu);
 							tavu = tavu.replaceAll("@.*", "");
 							if (!ending.isEmpty()) {
@@ -224,10 +214,11 @@ class nuolenna {
 						tavu = tavu.replaceAll("_", "");
 
 						if (tavu.matches("\\A[\\{\\[\\< ]+.*") || tavu.matches(".*[ \\}\\]\\>]+\\z")) {
-							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> ]*)\\z");
+							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> ]*[\\!\\?\\#]*)\\z");
 							Matcher match = checkParentheses.matcher(tavu);
 							if (match.find()) {
 								parentheses(match.group(1), match.group(2), tavu);
+								continue;
 							}
 
 						}
@@ -279,13 +270,18 @@ class nuolenna {
 // We'll change all combination signs to just signs following each other
 				nuolenpaa = nuolenpaa.replaceAll("x", "");
 				nuolenpaa = nuolenpaa.replaceAll("X", "");
+				nuolenpaa = nuolenpaa.replaceAll("×", "");
 				nuolenpaa = nuolenpaa.replaceAll("\\.", "");
 
 // We make substitutions to conform to our desired format(convert subscripts to integers, replace accents)
 				translitteraatio = translitteraatio.replaceAll("š", "sz");
+				translitteraatio = translitteraatio.replaceAll("×", "");
+				translitteraatio = translitteraatio.replaceAll("X", "");
+				translitteraatio = translitteraatio.replaceAll("x", "");
 				translitteraatio = translitteraatio.replaceAll("ṭ", "t,");
 				translitteraatio = translitteraatio.replaceAll("ṣ", "s,");
 				translitteraatio = translitteraatio.replaceAll("ŋ", "g");
+				translitteraatio = translitteraatio.replaceAll("ₓ", "");
 				translitteraatio = translitteraatio.replaceAll("ḫ", "h,");
 				translitteraatio = translitteraatio.replaceAll("₁", "1");
 				translitteraatio = translitteraatio.replaceAll("₂", "2");
@@ -311,7 +307,7 @@ class nuolenna {
 		}
 	}
 
-//	Checks if the sybmol contains any parentheses around it. If it does, then print the symbol
+//	Checks if the symbol contains any parentheses around it. If it does, then print the symbol
 //	with the appropriate parentheses.
 	private static void parentheses(String char1, String char2, String tavu) {
 
