@@ -81,10 +81,10 @@ class nuolenna {
 
 //					Strips sana of all special characters and parntheses to check if there is a key for it in the hashmap.
 					String check = sana.replaceAll("[\\[\\{\\<\\]\\}\\>\\!\\?\\#]", "");
-
-					if ((sana.matches("^[1-90][1-90]*\\(.*\\).*$") && !cuneiMap.containsKey(sana)) ||
-							sana.matches("^[\\[\\{\\<]+[1-90][1-90]*\\(.*\\).*[\\]\\}\\>]+$") && !cuneiMap.containsKey(check)) {
-						Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> ]*)\\z");
+					boolean tester = cuneiMap.containsKey(check);
+					if (((sana.matches("^[1-90][1-90]*\\(.*\\).*$") && !cuneiMap.containsKey(sana)) ||
+							sana.matches("^[\\[\\{\\<]+[1-90][1-90]*\\(.*\\).*[\\]\\}\\>]+.*$")) && !cuneiMap.containsKey(check)) {
+						Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> ]*[\\!\\?\\#]*)\\z");
 						Matcher match = checkParentheses.matcher(sana);
 						if (match.find()) {
 							String left = match.group(1);
@@ -213,7 +213,7 @@ class nuolenna {
 //						tavu = tavu.replaceAll("[\\(\\)]", "");
 						tavu = tavu.replaceAll("_", "");
 
-						if (tavu.matches("\\A[\\{\\[\\< ]+.*") || tavu.matches(".*[ \\}\\]\\>]+\\z")) {
+						if (tavu.matches("\\A[\\{\\[\\< ]+.*") || tavu.matches(".*[ \\}\\]\\>]+[\\!\\?\\#]*\\z")) {
 							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> ]*[\\!\\?\\#]*)\\z");
 							Matcher match = checkParentheses.matcher(tavu);
 							if (match.find()) {
