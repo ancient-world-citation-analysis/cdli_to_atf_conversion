@@ -77,6 +77,8 @@ class nuolenna {
 //					brackets, i.e [1(n01] so that they can be printed in brackets.
 					sana = sana.replace("_", "");
 					sana = sana.replace(":", " ");
+					sana = sana.replace("X", "x");
+//					sana = sana.replace(".", "");
 					sana = sana.toLowerCase();
 
 //					Strips sana of all special characters and parntheses to check if there is a key for it in the hashmap.
@@ -109,7 +111,6 @@ class nuolenna {
 // $-sign means that the reading is uncertain (the sign is still certain) so we just remove all dollar signs
 					sana = sana.replace("'", " ");
 					sana = sana.replaceAll("[\\$]", "");
-					sana = sana.replace("x", "");
 					sana = sana.toLowerCase();
 // some complicated combination characters have their own sign in UTF, transformations here before removing pipes
 					sana = sana.replaceAll("gad\\&gad\\.gar\\&gar", "kinda");
@@ -154,13 +155,13 @@ class nuolenna {
 //						}
 //					}
 // combination characters are inside pipes, but they are indicated also by combining markers, so we check markers and remove pipes
-					if (!cuneiMap.containsKey(sana)) {
+					if (!cuneiMap.containsKey(check)) {
 						sana = sana.replaceAll("\\|", "");
 					}
 // Logograms separated internally by dots (e.g., GIR₂.TAB). If they are inside (...) they are not removed yet.
-					if (!sana.matches(".*\\(.*\\..*\\).*")) {
-						sana = sana.replaceAll("[.]", " ");
-					}
+//					if (!sana.matches(".*\\(.*\\..*\\).*")) {
+//						sana = sana.replaceAll("[.]", " ");
+//					}
 // "Phonetic complements are preceded by a + inside curly brackets (e.g., KUR{+ud} = ikšud)."
 // http://oracc.museum.upenn.edu/doc/help/editinginatf/primer/inlinetutorial/index.html
 					sana = sana.replaceAll("\\{\\+", " ");
@@ -172,15 +173,14 @@ class nuolenna {
 // LAGAŠ = ŠIR.BUR.LA
 					sana = sana.replaceAll("-", " ");
 					sana = sana.replaceAll("lagasz ", "šir bur la ");
-					sana = sana.replaceAll("(\\w+)([\\[\\{\\<])", "$1 $2");
-					sana = sana.replaceAll("([\\]\\}\\>])(\\w+)", "$1 $2");
+					if (!tester) {
+						sana = sana.replaceAll("([\\w\\!\\?\\#]+)([\\[\\{\\<\\(])", "$1 $2");
+						sana = sana.replaceAll("([\\]\\}\\>])([\\w\\!\\?\\#\\)]+)", "$1 $2");
+					}
 
-					sana = sana.replace("x", "");
 
 					String[] tavut = sana.split(" ");
-					for (String tav : tavut) {
-						tav = tav.trim();
-					}
+
 					for (String tavu : tavut) {
 						tavu = tavu.toLowerCase().trim();
 // After the characters @ and ~ there is some annotation which should no affect cuneifying, so we just remove it.
@@ -211,10 +211,10 @@ class nuolenna {
 						}
 
 //						tavu = tavu.replaceAll("[\\(\\)]", "");
-						tavu = tavu.replaceAll("_", "");
+//						tavu = tavu.replaceAll("_", "");
 
-						if (tavu.matches("\\A[\\{\\[\\< ]+.*") || tavu.matches(".*[ \\}\\]\\>]+[\\!\\?\\#]*\\z")) {
-							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> ]*[\\!\\?\\#]*)\\z");
+						if (tavu.matches("\\A[\\{\\[\\<\\( ]+.*") || tavu.matches(".*[ \\}\\]\\>\\)]+[\\!\\?\\#]*\\z") && !cuneiMap.containsKey(tavu)) {
+							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\<\\( ]*).*?([\\}\\]\\>\\) ]*[\\!\\?\\#]*)\\z");
 							Matcher match = checkParentheses.matcher(tavu);
 							if (match.find()) {
 								parentheses(match.group(1), match.group(2), tavu);
@@ -268,30 +268,32 @@ class nuolenna {
 				translitteraatio = translitteraatio.toLowerCase();
 				String nuolenpaa = line.replaceAll(".*\t", "");
 // We'll change all combination signs to just signs following each other
-				nuolenpaa = nuolenpaa.replaceAll("x", "");
-				nuolenpaa = nuolenpaa.replaceAll("X", "");
-				nuolenpaa = nuolenpaa.replaceAll("×", "");
+//				nuolenpaa = nuolenpaa.replaceAll("x", "");
+				nuolenpaa = nuolenpaa.replaceAll("X", "x");
+				nuolenpaa = nuolenpaa.replaceAll("×", "x");
 				nuolenpaa = nuolenpaa.replaceAll("\\.", "");
 
 // We make substitutions to conform to our desired format(convert subscripts to integers, replace accents)
-				translitteraatio = translitteraatio.replaceAll("š", "sz");
-				translitteraatio = translitteraatio.replaceAll("×", "");
-				translitteraatio = translitteraatio.replaceAll("X", "");
-				translitteraatio = translitteraatio.replaceAll("x", "");
-				translitteraatio = translitteraatio.replaceAll("ṭ", "t,");
-				translitteraatio = translitteraatio.replaceAll("ṣ", "s,");
-				translitteraatio = translitteraatio.replaceAll("ŋ", "g");
-				translitteraatio = translitteraatio.replaceAll("ₓ", "");
-				translitteraatio = translitteraatio.replaceAll("ḫ", "h,");
-				translitteraatio = translitteraatio.replaceAll("₁", "1");
-				translitteraatio = translitteraatio.replaceAll("₂", "2");
-				translitteraatio = translitteraatio.replaceAll("₃", "3");
-				translitteraatio = translitteraatio.replaceAll("₄", "4");
-				translitteraatio = translitteraatio.replaceAll("₅", "5");
-				translitteraatio = translitteraatio.replaceAll("₆", "6");
-				translitteraatio = translitteraatio.replaceAll("₇", "7");
-				translitteraatio = translitteraatio.replaceAll("₈", "8");
-				translitteraatio = translitteraatio.replaceAll("₉", "9");
+				translitteraatio = translitteraatio.replace("š", "sz");
+				translitteraatio = translitteraatio.replace("×", "");
+				translitteraatio = translitteraatio.replace("X", "x");
+				translitteraatio = translitteraatio.replace("×", "x");
+				translitteraatio = translitteraatio.replace("ṭ", "t,");
+				translitteraatio = translitteraatio.replace("ₓ", "x");
+				translitteraatio = translitteraatio.replace("ṣ", "s,");
+				translitteraatio = translitteraatio.replace("ŋ", "g");
+				translitteraatio = translitteraatio.replace("ₓ", "");
+				translitteraatio = translitteraatio.replace("ḫ", "h,");
+				translitteraatio = translitteraatio.replace("₁", "1");
+				translitteraatio = translitteraatio.replace("₂", "2");
+				translitteraatio = translitteraatio.replace("₃", "3");
+				translitteraatio = translitteraatio.replace("₄", "4");
+				translitteraatio = translitteraatio.replace("₅", "5");
+				translitteraatio = translitteraatio.replace("₆", "6");
+				translitteraatio = translitteraatio.replace("₇", "7");
+				translitteraatio = translitteraatio.replace("₈", "8");
+				translitteraatio = translitteraatio.replace("₉", "9");
+				translitteraatio = translitteraatio.replace(".", "");
 
 // we add to cuneimap only if there is a transliteration
 
@@ -319,6 +321,9 @@ class nuolenna {
 		}
 		if (cuneiMap.containsKey(tavu)) {
 			System.out.print(char1 + cuneiMap.get(tavu) + ending + char2);
+		}
+		if (tavu.equals("...")) {
+			System.out.print(char1 + tavu + ending + char2);
 		}
 	}
 //	This function checks if the string passed in has any important characters at the end
