@@ -175,7 +175,7 @@ class nuolenna {
 					sana = sana.replaceAll("lagasz ", "šir bur la ");
 					if (!tester) {
 						sana = sana.replaceAll("([\\w\\!\\?\\#]+)([\\[\\{\\<\\(])", "$1 $2");
-						sana = sana.replaceAll("([\\]\\}\\>])([\\w\\!\\?\\#\\)]+)", "$1 $2");
+						sana = sana.replaceAll("([\\]\\}\\>])([\\w\\)]+)", "$1 $2");
 					}
 
 
