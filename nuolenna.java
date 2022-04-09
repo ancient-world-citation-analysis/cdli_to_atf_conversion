@@ -213,7 +213,8 @@ class nuolenna {
 //						tavu = tavu.replaceAll("[\\(\\)]", "");
 //						tavu = tavu.replaceAll("_", "");
 
-						if (tavu.matches("\\A[\\{\\[\\<\\( ]+.*") || tavu.matches(".*[ \\}\\]\\>\\)]+[\\!\\?\\#]*\\z") && !cuneiMap.containsKey(tavu)) {
+						if (tavu.matches("\\A[\\{\\[\\<\\( ]+.*") || tavu.matches(".*[ \\}\\]\\>\\)]+[\\!\\?\\#]*\\z") && !cuneiMap.containsKey(tavu)
+								&& !tavu.matches(".*\\d+\\(.*\\).*")) {
 							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\<\\( ]*).*?([\\}\\]\\>\\) ]*[\\!\\?\\#]*)\\z");
 							Matcher match = checkParentheses.matcher(tavu);
 							if (match.find()) {
@@ -231,14 +232,15 @@ class nuolenna {
 						if (cuneiMap.containsKey(tavu)) {
 							System.out.print(cuneiMap.get(tavu) + ending);
 						}
-						else if ((tavu.contains("×") || tavu.contains(".")) && !tavu.contains("&")) {
-							tavu = tavu.replaceAll("[\\.]", "×");
-							String[] alatavut = tavu.split("×");
+						else if ((tavu.contains("x") || tavu.contains(".")) && !tavu.contains("&")) {
+							tavu = tavu.replaceAll("[\\.]", "x");
+							String[] alatavut = tavu.split("x");
 							for (String alatavu: alatavut) {
 								if (cuneiMap.containsKey(alatavu)) {
 									System.out.print(cuneiMap.get(alatavu));
 								}
 							}
+							System.out.print(ending);
 						}
 						else if (tavu.equals("€")) {
 							System.out.print("  ");
