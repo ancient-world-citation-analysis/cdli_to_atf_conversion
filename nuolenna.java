@@ -78,12 +78,15 @@ class nuolenna {
 					sana = sana.replace("_", "");
 					sana = sana.replace(":", " ");
 					sana = sana.replace("X", "x");
-//					sana = sana.replace(".", "");
+					sana = sana.replace(".", " ");
 					sana = sana.toLowerCase();
 
 //					Strips sana of all special characters and parntheses to check if there is a key for it in the hashmap.
 					String check = sana.replaceAll("[\\[\\{\\<\\]\\}\\>\\!\\?\\#]", "");
 					boolean tester = cuneiMap.containsKey(check);
+					if (!tester) {
+						sana = sana.replace("&", " ");
+					}
 					if (((sana.matches("^[1-90][1-90]*\\(.*\\).*$") && !cuneiMap.containsKey(sana)) ||
 							sana.matches("^[\\[\\{\\<]+[1-90][1-90]*\\(.*\\).*[\\]\\}\\>]+.*$")) && !cuneiMap.containsKey(check)) {
 						Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> ]*[\\!\\?\\#]*)\\z");
@@ -119,12 +122,12 @@ class nuolenna {
 					sana = sana.replaceAll("še\\&še\\.tab\\&tab.gar\\&gar", "garadin3");
 // "Signs which have the special subscript ₓ must be qualified in ATF by placing the sign name in parentheses immediately after the sign value"
 // http://oracc.museum.upenn.edu/doc/help/editinginatf/primer/inlinetutorial/index.html
-					if (sana.matches(".*[\\.-][^\\.-]*ₓ\\(.*\\).*")) {
+					if (sana.matches(".*[\\.-][^\\.-]*ₓ\\(.*\\).*") && !tester) {
 						while (sana.matches(".*[\\.-][^\\.-]*ₓ\\(.*\\).*")) {
 							sana = sana.replaceAll("(.*[\\.-])([^\\.-]*ₓ\\()([^\\)]*)(\\))(.*)", "$1$3$5");
 						}
 					}
-					if (sana.matches(".*ₓ\\(.*\\).*")) {
+					if (sana.matches(".*ₓ\\(.*\\).*") && !tester) {
 						while (sana.matches(".*ₓ\\(.*\\).*")) {
 							sana = sana.replaceAll("(.*ₓ\\()([^\\)]*)(\\))(.*)", "$2$4");
 						}
@@ -137,19 +140,19 @@ class nuolenna {
 						}
 					}
 // then we handle "|...|(...)"
-					if (sana.matches(".*\\|[^\\|]*\\|\\(.*\\).*")) {
+					if (sana.matches(".*\\|[^\\|]*\\|\\(.*\\).*") && !tester) {
 						while (sana.matches(".*\\|[^\\|]*\\|\\(.*\\).*")) {
 							sana = sana.replaceAll("(.*\\|[^\\|]*\\|)(\\(.*\\))(.*)", "$1$3");
 						}
 					}
 
 // then we remove the more general case
-//					if (sana.matches(".*[\\.-][^\\.-]*[^\\|\\&]\\(.*\\).*")) {
-//						while (sana.matches(".*[\\.-][^\\.-]*[^\\|\\&]\\(.*\\).*")) {
-//							sana = sana.replaceAll("(.*[\\.-][^\\.-]*[^\\|\\&])(\\(.*\\))(.*)", "$1$3");
-//						}
-//					}
-//					if (sana.matches(".*[^\\|\\&]\\(.*\\).*")) {
+					if (sana.matches(".*[\\.-][^\\.-]*[^\\|\\&]\\(.*\\).*") && !tester) {
+						while (sana.matches(".*[\\.-][^\\.-]*[^\\|\\&]\\(.*\\).*")) {
+							sana = sana.replaceAll("(.*[\\.-][^\\.-]*[^\\|\\&])(\\(.*\\))(.*)", "$1$3");
+						}
+					}
+//					if (sana.matches(".*[^\\|\\&]\\(.*\\).*") && !tester) {
 //						while (sana.matches(".*[^\\|\\&]\\([^\\(\\)]*\\).*")) {
 //							sana = sana.replaceAll("(.*[^\\|\\&])(\\([^\\(\\)]*\\))(.*)","$1$3");
 //						}
@@ -276,6 +279,7 @@ class nuolenna {
 				nuolenpaa = nuolenpaa.replaceAll("\\.", "");
 
 // We make substitutions to conform to our desired format(convert subscripts to integers, replace accents)
+				translitteraatio = translitteraatio.replace("&", " ");
 				translitteraatio = translitteraatio.replace("š", "sz");
 				translitteraatio = translitteraatio.replace("×", "");
 				translitteraatio = translitteraatio.replace("X", "x");
@@ -283,7 +287,8 @@ class nuolenna {
 				translitteraatio = translitteraatio.replace("ṭ", "t,");
 				translitteraatio = translitteraatio.replace("ₓ", "x");
 				translitteraatio = translitteraatio.replace("ṣ", "s,");
-				translitteraatio = translitteraatio.replace("ŋ", "g");
+				translitteraatio = translitteraatio.replace("ŋ", "j");
+				translitteraatio = translitteraatio.replace("Ḫ", "H,");
 				translitteraatio = translitteraatio.replace("ₓ", "");
 				translitteraatio = translitteraatio.replace("ḫ", "h,");
 				translitteraatio = translitteraatio.replace("₁", "1");
@@ -296,6 +301,8 @@ class nuolenna {
 				translitteraatio = translitteraatio.replace("₈", "8");
 				translitteraatio = translitteraatio.replace("₉", "9");
 				translitteraatio = translitteraatio.replace(".", "");
+				translitteraatio = translitteraatio.replace("ś", "s'");
+				translitteraatio = translitteraatio.replace("Ś", "S'");
 
 // we add to cuneimap only if there is a transliteration
 
