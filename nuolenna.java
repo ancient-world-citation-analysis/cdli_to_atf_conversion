@@ -87,7 +87,7 @@ class nuolenna {
 					if (!tester) {
 						sana = sana.replace("&", " ");
 					}
-					if (((sana.matches("^[1-90][1-90]*\\(.*\\)$") && !cuneiMap.containsKey(sana)) ||
+					if (((sana.matches("^[1-90][1-90]*\\(.*\\)[\\!\\#\\?]*$") && !cuneiMap.containsKey(sana)) ||
 							sana.matches("^[\\[\\{\\<]+[1-90][1-90]*\\(.*\\).*[\\]\\}\\>\\!\\?\\#]*.*$")) && !cuneiMap.containsKey(check)) {
 						Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> ]*[\\!\\?\\#]*)\\z");
 						Matcher match = checkParentheses.matcher(sana);
