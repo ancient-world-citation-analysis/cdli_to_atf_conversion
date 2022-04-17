@@ -78,6 +78,7 @@ class nuolenna {
 					sana = sana.replace("_", "");
 					sana = sana.replace(":", " ");
 					sana = sana.replace("X", "x");
+					sana = sana.replaceAll("[\\(\\)]", "");
 //					sana = sana.replace(".", " ");
 					sana = sana.toLowerCase();
 
@@ -193,9 +194,10 @@ class nuolenna {
 					for (String tavu : tavut) {
 						boolean contain = cuneiMap.containsKey(tavu.replaceAll("[\\!\\?\\#\\{\\[\\<\\}\\]\\>]", ""));
 						tavu = tavu.toLowerCase().trim();
-						if (!contain) {
-							tavu = tavu.replaceAll("[\\(\\)]", "");
-						}
+//						if (!contain) {
+//							tavu = tavu.replaceAll("[\\(\\)]", "");
+//						}
+						tavu = tavu.replaceAll("[\\(\\)]", "");
 // After the characters @ and ~ there is some annotation which should no affect cuneifying, so we just remove it.
 						if (tavu.matches(".*@[19cghknrstvz].*") && !contain) {
 							String ending = handleChar(tavu);
@@ -304,6 +306,7 @@ class nuolenna {
 				nuolenpaa = nuolenpaa.replaceAll("\\.", "");
 
 // We make substitutions to conform to our desired format(convert subscripts to integers, replace accents)
+				translitteraatio = translitteraatio.replace("|", "");
 				translitteraatio = translitteraatio.replace("&", " ");
 				translitteraatio = translitteraatio.replace("š", "sz");
 				translitteraatio = translitteraatio.replace("×", "");
@@ -329,6 +332,8 @@ class nuolenna {
 				translitteraatio = translitteraatio.replace("ś", "s'");
 				translitteraatio = translitteraatio.replace("Ś", "S'");
 				translitteraatio = translitteraatio.replace("ʾ", "'");
+				translitteraatio = translitteraatio.replace(".", " ");
+				translitteraatio = translitteraatio.replaceAll("[\\(\\)]", "");
 
 // we add to cuneimap only if there is a transliteration
 
