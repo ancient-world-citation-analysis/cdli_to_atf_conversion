@@ -68,8 +68,10 @@ class nuolenna {
 					System.out.print(line.split(" ")[0]);
 					line = line.replaceAll("^[\\S]+", "");
 				}
+				line = line.replaceAll("([^\\.]+)(\\.)([^\\.]+?)", "$1 $3");
 // Logograms are written in capitals, but the signs are the same
 				String[] sanat = line.split(" ");
+
 				for (String sana : sanat) {
 // REPETITION '(' GRAPHEME ')'
 //					Made some modifications here, added the "&& !cuneiMap.containsKey(sana)" to check
@@ -78,7 +80,9 @@ class nuolenna {
 					sana = sana.replace("_", "");
 					sana = sana.replace(":", " ");
 					sana = sana.replace("X", "x");
-					sana = sana.replaceAll("[\\(\\)]", "");
+					sana = sana.replace("'", " ");
+					sana = sana.replace("|", "");
+//					sana = sana.replaceAll("[\\(\\)]", "");
 //					sana = sana.replace(".", " ");
 					sana = sana.toLowerCase();
 
@@ -113,11 +117,6 @@ class nuolenna {
 						}
 					}
 // $-sign means that the reading is uncertain (the sign is still certain) so we just remove all dollar signs
-					for (String sa: sana.split(" ")) {
-						if (!cuneiMap.containsKey(sa)) {
-							sa = sa.replace("'", " ");
-						}
-					}
 					sana = sana.replaceAll("[\\$]", "");
 					sana = sana.toLowerCase();
 // some complicated combination characters have their own sign in UTF, transformations here before removing pipes
@@ -197,7 +196,7 @@ class nuolenna {
 //						if (!contain) {
 //							tavu = tavu.replaceAll("[\\(\\)]", "");
 //						}
-						tavu = tavu.replaceAll("[\\(\\)]", "");
+//						tavu = tavu.replaceAll("[\\(\\)]", "");
 // After the characters @ and ~ there is some annotation which should no affect cuneifying, so we just remove it.
 						if (tavu.matches(".*@[19cghknrstvz].*") && !contain) {
 							String ending = handleChar(tavu);
@@ -331,9 +330,10 @@ class nuolenna {
 				translitteraatio = translitteraatio.replace(".", "");
 				translitteraatio = translitteraatio.replace("ś", "s'");
 				translitteraatio = translitteraatio.replace("Ś", "S'");
-				translitteraatio = translitteraatio.replace("ʾ", "'");
+				translitteraatio = translitteraatio.replace("ʾ", "");
 				translitteraatio = translitteraatio.replace(".", " ");
-				translitteraatio = translitteraatio.replaceAll("[\\(\\)]", "");
+				translitteraatio = translitteraatio.replace("'", " ");
+//				translitteraatio = translitteraatio.replaceAll("[\\(\\)]", "");
 
 // we add to cuneimap only if there is a transliteration
 
