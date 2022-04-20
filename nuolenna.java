@@ -69,6 +69,7 @@ class nuolenna {
 					line = line.replaceAll("^[\\S]+", "");
 				}
 				line = line.replaceAll("([^\\.]+)(\\.)([^\\.]+?)", "$1 $3");
+				line = line.replace("x", " ");
 // Logograms are written in capitals, but the signs are the same
 				String[] sanat = line.split(" ");
 
@@ -77,8 +78,8 @@ class nuolenna {
 //					Made some modifications here, added the "&& !cuneiMap.containsKey(sana)" to check
 //					if the number is in the sign list as it is. Also accounted for possible square or curly
 //					brackets, i.e [1(n01] so that they can be printed in brackets.
+					sana = sana.replaceAll("([^\\.]+)(\\.)([^\\.]+?)", "$1 $3");
 					sana = sana.replace("_", "");
-					sana = sana.replace(":", " ");
 					sana = sana.replace("X", "x");
 					sana = sana.replace("'", " ");
 					sana = sana.replace("|", "");
@@ -106,7 +107,8 @@ class nuolenna {
 								sana = sana.replace(ending, "");
 							}
 							String merkki = sana.replaceAll("^[1-90][1-90]*\\(", "");
-							merkki = merkki.replaceAll("\\)$", "");
+//							Pattern checkOther = Pattern.compile("\\((.*)");
+							merkki = merkki.replaceAll("\\)", "");
 							int maara = Integer.valueOf(sana.replaceAll("\\(.*$", ""));
 							sana = merkki;
 							while (maara > 1) {
@@ -241,9 +243,9 @@ class nuolenna {
 //						tavu = tavu.replaceAll("[\\(\\)]", "");
 //						tavu = tavu.replaceAll("_", "");
 
-						if (tavu.matches("\\A[\\{\\[\\<\\( ]+.*") || tavu.matches(".*[ \\}\\]\\>]+[\\!\\?\\#]*\\z") && !cuneiMap.containsKey(tavu)
+						if (tavu.matches("\\A[\\{\\[\\<\\( ]+.*") || tavu.matches(".*[ \\}\\]\\>\\)]+[\\!\\?\\#]*\\z") && !cuneiMap.containsKey(tavu)
 								&& !tavu.matches(".*\\d+\\(.*\\).*")) {
-							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\<\\( ]*).*?([\\}\\]\\> ]*[\\!\\?\\#]*)\\z");
+							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\<\\( ]*).*?([\\}\\]\\>\\) ]*[\\!\\?\\#]*)\\z");
 							Matcher match = checkParentheses.matcher(tavu);
 							if (match.find()) {
 								parentheses(match.group(1), match.group(2), tavu);
