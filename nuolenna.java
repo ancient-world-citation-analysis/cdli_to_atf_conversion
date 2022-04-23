@@ -68,14 +68,14 @@ class nuolenna {
 					System.out.print(line.split(" ")[0]);
 					line = line.replaceAll("^[\\S]+", "");
 				}
-				line = line.replaceAll("([^\\.]+)(\\.)([^\\.]+?)", "$1 $3");
-				line = line.replaceAll("[xX]", " ");
+				line = line.replaceAll("X", "x");
 				line = line.replace("(", "");
 				line = line.replace(")", "");
+				line = line.toLowerCase().trim();
 				for (String sa : line.split(" ")) {
 					if (!cuneiMap.containsKey(sa.replaceAll("[\\!\\#\\?\\[\\{\\\\}\\]\\>\\<]", ""))) {
 						line = line.replaceAll("([\\w\\!\\?\\#\\}\\]\\)\\>]+)([\\[\\{\\<\\(])", "$1 $2");
-						line = line.replaceAll("([\\]\\}\\>\\!\\?\\#])([\\w\\)]+)", "$1 $2");
+						line = line.replaceAll("([\\]\\}\\>\\!\\?\\#\\|])([\\w\\)]+)", "$1 $2");
 					}
 				}
 // Logograms are written in capitals, but the signs are the same
@@ -86,12 +86,10 @@ class nuolenna {
 //					Made some modifications here, added the "&& !cuneiMap.containsKey(sana)" to check
 //					if the number is in the sign list as it is. Also accounted for possible square or curly
 //					brackets, i.e [1(n01] so that they can be printed in brackets.
-					sana = sana.replaceAll("([^\\.]+)(\\.)([^\\.]+?)", "$1 $3");
 					sana = sana.replace("_", "");
 					sana = sana.replace("'", " ");
 					sana = sana.replace("|", "");
-//					sana = sana.replaceAll("[\\(\\)]", "");
-//					sana = sana.replace(".", " ");
+
 					sana = sana.toLowerCase();
 
 //					Strips sana of all special characters and parntheses to check if there is a key for it in the hashmap.
@@ -131,52 +129,46 @@ class nuolenna {
 					sana = sana.replaceAll("še\\&še\\.tab\\&tab.gar\\&gar", "garadin3");
 // "Signs which have the special subscript ₓ must be qualified in ATF by placing the sign name in parentheses immediately after the sign value"
 // http://oracc.museum.upenn.edu/doc/help/editinginatf/primer/inlinetutorial/index.html
-					if (sana.matches(".*[\\.-][^\\.-]*ₓ\\(.*\\).*") && !tester) {
-						while (sana.matches(".*[\\.-][^\\.-]*ₓ\\(.*\\).*")) {
-							sana = sana.replaceAll("(.*[\\.-])([^\\.-]*ₓ\\()([^\\)]*)(\\))(.*)", "$1$3$5");
-						}
-					}
-					if (sana.matches(".*ₓ\\(.*\\).*") && !tester) {
-						while (sana.matches(".*ₓ\\(.*\\).*")) {
-							sana = sana.replaceAll("(.*ₓ\\()([^\\)]*)(\\))(.*)", "$2$4");
-						}
-					}
-// old or more precise readings can be within parenthesis straight after the sign. We just remove the parenthesis and what is inside them
-// first we handle "xxx(|...|)"
-					if (sana.matches(".*[^\\|\\&]\\(\\|[^\\|]*\\|\\).*")) {
-						while (sana.matches(".*[^\\|\\&]\\(\\|[^\\|]*\\|\\).*")) {
-							sana = sana.replaceAll("(.*[^\\|\\&])(\\(\\|[^\\|]*\\|\\))(.*)", "$1$3");
-						}
-					}
-// then we handle "|...|(...)"
-					if (sana.matches(".*\\|[^\\|]*\\|\\(.*\\).*") && !tester) {
-						while (sana.matches(".*\\|[^\\|]*\\|\\(.*\\).*")) {
-							sana = sana.replaceAll("(.*\\|[^\\|]*\\|)(\\(.*\\))(.*)", "$1$3");
-						}
-					}
-
-// then we remove the more general case
-					if (sana.matches(".*[\\.-][^\\.-]*[^\\|\\&]\\(.*\\).*") && !tester) {
-						while (sana.matches(".*[\\.-][^\\.-]*[^\\|\\&]\\(.*\\).*")) {
-							sana = sana.replaceAll("(.*[\\.-][^\\.-]*[^\\|\\&])(\\(.*\\))(.*)", "$1$3");
-						}
-					}
+//					if (sana.matches(".*[\\.-][^\\.-]*ₓ\\(.*\\).*") && !tester) {
+//						while (sana.matches(".*[\\.-][^\\.-]*ₓ\\(.*\\).*")) {
+//							sana = sana.replaceAll("(.*[\\.-])([^\\.-]*ₓ\\()([^\\)]*)(\\))(.*)", "$1$3$5");
+//						}
+//					}
+//					if (sana.matches(".*ₓ\\(.*\\).*") && !tester) {
+//						while (sana.matches(".*ₓ\\(.*\\).*")) {
+//							sana = sana.replaceAll("(.*ₓ\\()([^\\)]*)(\\))(.*)", "$2$4");
+//						}
+//					}
+//// old or more precise readings can be within parenthesis straight after the sign. We just remove the parenthesis and what is inside them
+//// first we handle "xxx(|...|)"
+//					if (sana.matches(".*[^\\|\\&]\\(\\|[^\\|]*\\|\\).*")) {
+//						while (sana.matches(".*[^\\|\\&]\\(\\|[^\\|]*\\|\\).*")) {
+//							sana = sana.replaceAll("(.*[^\\|\\&])(\\(\\|[^\\|]*\\|\\))(.*)", "$1$3");
+//						}
+//					}
+//// then we handle "|...|(...)"
+//					if (sana.matches(".*\\|[^\\|]*\\|\\(.*\\).*") && !tester) {
+//						while (sana.matches(".*\\|[^\\|]*\\|\\(.*\\).*")) {
+//							sana = sana.replaceAll("(.*\\|[^\\|]*\\|)(\\(.*\\))(.*)", "$1$3");
+//						}
+//					}
+//
+//// then we remove the more general case
+//					if (sana.matches(".*[\\.-][^\\.-]*[^\\|\\&]\\(.*\\).*") && !tester) {
+//						while (sana.matches(".*[\\.-][^\\.-]*[^\\|\\&]\\(.*\\).*")) {
+//							sana = sana.replaceAll("(.*[\\.-][^\\.-]*[^\\|\\&])(\\(.*\\))(.*)", "$1$3");
+//						}
+//					}
 //					if (sana.matches(".*[^\\|\\&]\\(.*\\).*") && !tester) {
 //						while (sana.matches(".*[^\\|\\&]\\([^\\(\\)]*\\).*")) {
 //							sana = sana.replaceAll("(.*[^\\|\\&])(\\([^\\(\\)]*\\))(.*)","$1$3");
 //						}
 //					}
-// combination characters are inside pipes, but they are indicated also by combining markers, so we check markers and remove pipes
-					if (!cuneiMap.containsKey(check)) {
-						sana = sana.replaceAll("\\|", "");
-					}
-// Logograms separated internally by dots (e.g., GIR₂.TAB). If they are inside (...) they are not removed yet.
-//					if (!sana.matches(".*\\(.*\\..*\\).*")) {
-//						sana = sana.replaceAll("[.]", " ");
-//					}
+
+
 // "Phonetic complements are preceded by a + inside curly brackets (e.g., KUR{+ud} = ikšud)."
 // http://oracc.museum.upenn.edu/doc/help/editinginatf/primer/inlinetutorial/index.html
-					sana = sana.replaceAll("\\{\\+", " ");
+					sana = sana.replaceAll("\\+", "");
 // joining characters are combined by + sign, we separate joining chars by replacing with whitespace
 					sana = sana.replaceAll("\\+", " ");
 
@@ -192,16 +184,12 @@ class nuolenna {
 						}
 					}
 
-
 					String[] tavut = sana.split(" ");
 
 					for (String tavu : tavut) {
-						boolean contain = cuneiMap.containsKey(tavu.replaceAll("[\\!\\?\\#\\{\\[\\<\\}\\]\\>]", ""));
+						String checks = tavu.replaceAll("[\\!\\?\\#\\{\\[\\<\\}\\]\\>]", "");
+						boolean contain = cuneiMap.containsKey(checks);
 						tavu = tavu.toLowerCase().trim();
-//						if (!contain) {
-//							tavu = tavu.replaceAll("[\\(\\)]", "");
-//						}
-//						tavu = tavu.replaceAll("[\\(\\)]", "");
 // After the characters @ and ~ there is some annotation which should no affect cuneifying, so we just remove it.
 						if (tavu.matches(".*@[19cghknrstvz].*") && !contain) {
 							String ending = handleChar(tavu);
@@ -210,6 +198,7 @@ class nuolenna {
 								tavu = tavu + ending;
 							}
 						}
+
 //	Commenting this out to make some modifications that will allow it to preserve important symbols
 //	at the end of translitertaions, e.g. "#", "*"
 
@@ -220,7 +209,7 @@ class nuolenna {
 							tavu = tavu.replaceAll("~[abcdefptyv][1234dgpt]?p?", "");
 						}
 // All numbers to one
-						if (tavu.matches("[n][1-90][1-90]*~*.*") || tavu.matches("[1-90][1-90]*~*.*")  && !contain) {
+						if (tavu.matches("[n][1-90][1-90]*~*.*") || tavu.matches("[1-90][1-90]*~*.*") && !contain) {
 							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\<\\( ]*).*?([\\}\\]\\>\\) ]*[\\!\\?\\#]*)\\z");
 							Matcher match = checkParentheses.matcher(tavu);
 							tavu = "n01";
@@ -242,12 +231,35 @@ class nuolenna {
 						if (tavu.equals("1/2(iku)") || tavu.equals("1/4(iku)")) {
 							tavu = "";
 						}
+						String ending = handleChar(tavu);
+						if (!ending.isEmpty()) {
+							for (String symbol : ending.split("")) {
+								tavu = tavu.replace(symbol, "");
+							}
+						}
+						if ((tavu.contains("x") || tavu.contains(".")) && !tavu.contains("&") && !checks.equals("...")) {
+							tavu = tavu.replaceAll("[\\.]", "x");
+							String[] alatavut = tavu.split("x");
+							for (String alatavu: alatavut) {
+								Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\<\\( ]*).*?([\\}\\]\\>\\) ]*[\\!\\?\\#]*)\\z");
+								Matcher match = checkParentheses.matcher(alatavu);
+								String char1 = "";
+								String char2 = "";
+								if (match.find()) {
+									char1 = match.group(1);
+									char2 = match.group(2);
+								}
+								alatavu = alatavu.replace(char1, "");
+								alatavu = alatavu.replace(char2, "");
+								alatavu = alatavu.replace(ending, "");
+								if (cuneiMap.containsKey(alatavu)) {
+									System.out.print(char1 + cuneiMap.get(alatavu) + char2);
+								}
+							}
+							System.out.print(ending);
+						}
 
-//						tavu = tavu.replaceAll("[\\(\\)]", "");
-//						tavu = tavu.replaceAll("_", "");
-
-						if (tavu.matches("\\A[\\{\\[\\<\\( ]+.*") || tavu.matches(".*[ \\}\\]\\>\\)]+[\\!\\?\\#]*\\z") && !cuneiMap.containsKey(tavu)
-								&& !tavu.matches(".*\\d+\\(.*\\).*")) {
+						else if (tavu.matches("\\A[\\{\\[\\<\\( ]+.*") || tavu.matches(".*[ \\}\\]\\>\\)]+[\\!\\?\\#]*\\z") && !cuneiMap.containsKey(tavu)) {
 							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\<\\( ]*).*?([\\}\\]\\>\\) ]*[\\!\\?\\#]*)\\z");
 							Matcher match = checkParentheses.matcher(tavu);
 							if (match.find()) {
@@ -256,26 +268,12 @@ class nuolenna {
 							}
 
 						}
-						String ending = handleChar(tavu);
-						if (!ending.isEmpty()) {
-							for (String symbol : ending.split("")) {
-								tavu = tavu.replace(symbol, "");
-							}
-						}
+
 						if (cuneiMap.containsKey(tavu)) {
 							System.out.print(cuneiMap.get(tavu) + ending);
 						}
 
-						else if ((tavu.contains("x") || tavu.contains(".")) && !tavu.contains("&")) {
-							tavu = tavu.replaceAll("[\\.]", "x");
-							String[] alatavut = tavu.split("x");
-							for (String alatavu: alatavut) {
-								if (cuneiMap.containsKey(alatavu)) {
-									System.out.print(cuneiMap.get(alatavu));
-								}
-							}
-							System.out.print(ending);
-						}
+
 						else if (tavu.equals("€")) {
 							System.out.print("  ");
 						}
@@ -305,8 +303,8 @@ class nuolenna {
 				String nuolenpaa = line.replaceAll(".*\t", "");
 // We'll change all combination signs to just signs following each other
 //				nuolenpaa = nuolenpaa.replaceAll("x", "");
-				nuolenpaa = nuolenpaa.replaceAll("[xX×]", " ");
-				nuolenpaa = nuolenpaa.replaceAll("\\.", "");
+				nuolenpaa = nuolenpaa.replaceAll("[xX×]", "x");
+//				nuolenpaa = nuolenpaa.replaceAll("\\.", "");
 
 // We make substitutions to conform to our desired format(convert subscripts to integers, replace accents)
 				translitteraatio = translitteraatio.replace("|", "");
@@ -333,7 +331,7 @@ class nuolenna {
 				translitteraatio = translitteraatio.replace("₉", "9");
 				translitteraatio = translitteraatio.replace(".", "");
 				translitteraatio = translitteraatio.replace("ś", "s'");
-				translitteraatio = translitteraatio.replace("Ś", "S'");
+				translitteraatio = translitteraatio.replace("Ś", "s'");
 				translitteraatio = translitteraatio.replace("ʾ", "");
 				translitteraatio = translitteraatio.replace(".", " ");
 				translitteraatio = translitteraatio.replace("'", " ");
@@ -374,16 +372,10 @@ class nuolenna {
 //	such as !, ?, and # and returns a string containing all of these characters if it does
 	private static String handleChar(String tavu) {
 		String ending = "";
-		for (int i = 0; i < tavu.length(); i++) {
-			if (tavu.charAt(i) == '!') {
-				ending += '!';
-			}
-			if (tavu.charAt(i) == '#') {
-				ending += '#';
-			}
-			if (tavu.charAt(i) == '?') {
-				ending += '?';
-			}
+		Pattern symbolCheck = Pattern.compile("([\\!\\#\\?]*)\\z");
+		Matcher match = symbolCheck.matcher(tavu);
+		if (match.find()) {
+			ending = match.group(0);
 		}
 		return ending;
 	}
