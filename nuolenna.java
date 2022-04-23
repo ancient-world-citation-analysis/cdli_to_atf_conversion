@@ -69,7 +69,15 @@ class nuolenna {
 					line = line.replaceAll("^[\\S]+", "");
 				}
 				line = line.replaceAll("([^\\.]+)(\\.)([^\\.]+?)", "$1 $3");
-				line = line.replace("x", " ");
+				line = line.replaceAll("[xX]", " ");
+				line = line.replace("(", "");
+				line = line.replace(")", "");
+				for (String sa : line.split(" ")) {
+					if (!cuneiMap.containsKey(sa.replaceAll("[\\!\\#\\?\\[\\{\\\\}\\]\\>\\<]", ""))) {
+						line = line.replaceAll("([\\w\\!\\?\\#\\}\\]\\)\\>]+)([\\[\\{\\<\\(])", "$1 $2");
+						line = line.replaceAll("([\\]\\}\\>\\!\\?\\#])([\\w\\)]+)", "$1 $2");
+					}
+				}
 // Logograms are written in capitals, but the signs are the same
 				String[] sanat = line.split(" ");
 
@@ -80,7 +88,6 @@ class nuolenna {
 //					brackets, i.e [1(n01] so that they can be printed in brackets.
 					sana = sana.replaceAll("([^\\.]+)(\\.)([^\\.]+?)", "$1 $3");
 					sana = sana.replace("_", "");
-					sana = sana.replace("X", "x");
 					sana = sana.replace("'", " ");
 					sana = sana.replace("|", "");
 //					sana = sana.replaceAll("[\\(\\)]", "");
@@ -90,11 +97,8 @@ class nuolenna {
 //					Strips sana of all special characters and parntheses to check if there is a key for it in the hashmap.
 					String check = sana.replaceAll("[\\[\\{\\<\\]\\}\\>\\!\\?\\#]", "");
 					boolean tester = cuneiMap.containsKey(check);
-					if (!tester) {
-						sana = sana.replace("&", " ");
-					}
 					if (((sana.matches("^[1-90]+\\(.*\\)[\\!\\#\\?]*$") && !cuneiMap.containsKey(sana)) ||
-							sana.matches("^[\\[\\{\\<]*[1-90]+\\(.*\\).*[\\]\\}\\>\\!\\?\\#]*.*$")) && !cuneiMap.containsKey(check)) {
+							sana.matches("^[\\[\\{\\<]*[1-90]+.*[\\]\\}\\>\\!\\?\\#]*.*$")) && !cuneiMap.containsKey(check)) {
 						Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> ]*[\\!\\?\\#]*)\\z");
 						Matcher match = checkParentheses.matcher(sana);
 						if (match.find()) {
@@ -106,10 +110,9 @@ class nuolenna {
 							if (!ending.isEmpty()) {
 								sana = sana.replace(ending, "");
 							}
-							String merkki = sana.replaceAll("^[1-90][1-90]*\\(", "");
-//							Pattern checkOther = Pattern.compile("\\((.*)");
+							String merkki = sana.replaceAll("^[1-90]+", "");
 							merkki = merkki.replaceAll("\\)", "");
-							int maara = Integer.valueOf(sana.replaceAll("\\(.*$", ""));
+							int maara = Integer.valueOf(sana.replaceAll("[^\\d]+.*$", ""));
 							sana = merkki;
 							while (maara > 1) {
 								sana = sana + " " + merkki;
@@ -184,8 +187,8 @@ class nuolenna {
 					sana = sana.replaceAll("lagasz ", "šir bur la ");
 					for (String sa : sana.split(" ")) {
 						if (!cuneiMap.containsKey(sa.replaceAll("[\\!\\#\\?\\[\\{\\\\}\\]\\>\\<]", ""))) {
-							sana = sana.replaceAll("([\\w\\!\\?\\#]+)([\\[\\{\\<\\(])", "$1 $2");
-							sana = sana.replaceAll("([\\]\\}\\>])([\\w\\)]+)", "$1 $2");
+							sana = sana.replaceAll("([\\w\\!\\?\\#\\}\\]\\)\\>]+)([\\[\\{\\<\\(])", "$1 $2");
+							sana = sana.replaceAll("([\\]\\}\\>\\!\\?\\#])([\\w\\)]+)", "$1 $2");
 						}
 					}
 
@@ -217,7 +220,7 @@ class nuolenna {
 							tavu = tavu.replaceAll("~[abcdefptyv][1234dgpt]?p?", "");
 						}
 // All numbers to one
-						if (tavu.matches("[n][1-90][1-90]*~*.*") || tavu.matches("[1-90][1-90]*~*.*") && !contain) {
+						if (tavu.matches("[n][1-90][1-90]*~*.*") || tavu.matches("[1-90][1-90]*~*.*")  && !contain) {
 							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\<\\( ]*).*?([\\}\\]\\>\\) ]*[\\!\\?\\#]*)\\z");
 							Matcher match = checkParentheses.matcher(tavu);
 							tavu = "n01";
@@ -226,7 +229,7 @@ class nuolenna {
 								continue;
 							}
 						}
-						if (tavu.matches(".*[m][1-90][1-90]*~*.*")) {
+						if (tavu.matches("^[m][1-90][1-90]*~*.*$")) {
 							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\<\\( ]*).*?([\\}\\]\\>\\) ]*[\\!\\?\\#]*)\\z");
 							Matcher match = checkParentheses.matcher(tavu);
 							tavu = "m";
@@ -302,8 +305,7 @@ class nuolenna {
 				String nuolenpaa = line.replaceAll(".*\t", "");
 // We'll change all combination signs to just signs following each other
 //				nuolenpaa = nuolenpaa.replaceAll("x", "");
-				nuolenpaa = nuolenpaa.replaceAll("X", "x");
-				nuolenpaa = nuolenpaa.replaceAll("×", "x");
+				nuolenpaa = nuolenpaa.replaceAll("[xX×]", " ");
 				nuolenpaa = nuolenpaa.replaceAll("\\.", "");
 
 // We make substitutions to conform to our desired format(convert subscripts to integers, replace accents)
@@ -335,7 +337,7 @@ class nuolenna {
 				translitteraatio = translitteraatio.replace("ʾ", "");
 				translitteraatio = translitteraatio.replace(".", " ");
 				translitteraatio = translitteraatio.replace("'", " ");
-//				translitteraatio = translitteraatio.replaceAll("[\\(\\)]", "");
+				translitteraatio = translitteraatio.replaceAll("[\\(\\)]", "");
 
 // we add to cuneimap only if there is a transliteration
 
