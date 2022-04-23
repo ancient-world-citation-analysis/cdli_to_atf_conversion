@@ -71,6 +71,9 @@ class nuolenna {
 				line = line.replaceAll("X", "x");
 				line = line.replace("(", "");
 				line = line.replace(")", "");
+				line = line.replace("-", " ");
+				line = line.replace("{+", "{");
+				line = line.replace("+", " ");
 				line = line.toLowerCase().trim();
 				for (String sa : line.split(" ")) {
 					if (!cuneiMap.containsKey(sa.replaceAll("[\\!\\#\\?\\[\\{\\\\}\\]\\>\\<]", ""))) {
@@ -94,7 +97,6 @@ class nuolenna {
 
 //					Strips sana of all special characters and parntheses to check if there is a key for it in the hashmap.
 					String check = sana.replaceAll("[\\[\\{\\<\\]\\}\\>\\!\\?\\#]", "");
-					boolean tester = cuneiMap.containsKey(check);
 					if (((sana.matches("^[1-90]+\\(.*\\)[\\!\\#\\?]*$") && !cuneiMap.containsKey(sana)) ||
 							sana.matches("^[\\[\\{\\<]*[1-90]+.*[\\]\\}\\>\\!\\?\\#]*.*$")) && !cuneiMap.containsKey(check)) {
 						Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> ]*[\\!\\?\\#]*)\\z");
