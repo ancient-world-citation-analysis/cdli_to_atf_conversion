@@ -68,6 +68,8 @@ class nuolenna {
 					System.out.print(line.split(" ")[0]);
 					line = line.replaceAll("^[\\S]+", "");
 				}
+//	several modifications are made here in order to split the line into smaller more manageable chunks. All normal
+//	parentheses are removed, as well as dashes and plus signs.
 				line = line.replaceAll("X", "x");
 				line = line.replace("(", "");
 				line = line.replace(")", "");
@@ -97,6 +99,8 @@ class nuolenna {
 
 //					Strips sana of all special characters and parntheses to check if there is a key for it in the hashmap.
 					String check = sana.replaceAll("[\\[\\{\\<\\]\\}\\>\\!\\?\\#]", "");
+
+//	This piece of code handles repetition characters. For example 10(disz) repeats disz 10 times.
 					if (((sana.matches("^[1-90]+\\(.*\\)[\\!\\#\\?]*$") && !cuneiMap.containsKey(sana)) ||
 							sana.matches("^[\\[\\{\\<]*[1-90]+.*[\\]\\}\\>\\!\\?\\#]*.*$")) && !cuneiMap.containsKey(check)) {
 						Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> ]*[\\!\\?\\#]*)\\z");
@@ -123,62 +127,21 @@ class nuolenna {
 					}
 // $-sign means that the reading is uncertain (the sign is still certain) so we just remove all dollar signs
 					sana = sana.replaceAll("[\\$]", "");
-					sana = sana.toLowerCase();
 // some complicated combination characters have their own sign in UTF, transformations here before removing pipes
 					sana = sana.replaceAll("gad\\&gad\\.gar\\&gar", "kinda");
 					sana = sana.replaceAll("bu\\&bu\\.ab", "sirsir");
 					sana = sana.replaceAll("tur\\&tur\\.za\\&za", "zizna");
 					sana = sana.replaceAll("še\\&še\\.tab\\&tab.gar\\&gar", "garadin3");
-// "Signs which have the special subscript ₓ must be qualified in ATF by placing the sign name in parentheses immediately after the sign value"
-// http://oracc.museum.upenn.edu/doc/help/editinginatf/primer/inlinetutorial/index.html
-//					if (sana.matches(".*[\\.-][^\\.-]*ₓ\\(.*\\).*") && !tester) {
-//						while (sana.matches(".*[\\.-][^\\.-]*ₓ\\(.*\\).*")) {
-//							sana = sana.replaceAll("(.*[\\.-])([^\\.-]*ₓ\\()([^\\)]*)(\\))(.*)", "$1$3$5");
-//						}
-//					}
-//					if (sana.matches(".*ₓ\\(.*\\).*") && !tester) {
-//						while (sana.matches(".*ₓ\\(.*\\).*")) {
-//							sana = sana.replaceAll("(.*ₓ\\()([^\\)]*)(\\))(.*)", "$2$4");
-//						}
-//					}
-//// old or more precise readings can be within parenthesis straight after the sign. We just remove the parenthesis and what is inside them
-//// first we handle "xxx(|...|)"
-//					if (sana.matches(".*[^\\|\\&]\\(\\|[^\\|]*\\|\\).*")) {
-//						while (sana.matches(".*[^\\|\\&]\\(\\|[^\\|]*\\|\\).*")) {
-//							sana = sana.replaceAll("(.*[^\\|\\&])(\\(\\|[^\\|]*\\|\\))(.*)", "$1$3");
-//						}
-//					}
-//// then we handle "|...|(...)"
-//					if (sana.matches(".*\\|[^\\|]*\\|\\(.*\\).*") && !tester) {
-//						while (sana.matches(".*\\|[^\\|]*\\|\\(.*\\).*")) {
-//							sana = sana.replaceAll("(.*\\|[^\\|]*\\|)(\\(.*\\))(.*)", "$1$3");
-//						}
-//					}
-//
-//// then we remove the more general case
-//					if (sana.matches(".*[\\.-][^\\.-]*[^\\|\\&]\\(.*\\).*") && !tester) {
-//						while (sana.matches(".*[\\.-][^\\.-]*[^\\|\\&]\\(.*\\).*")) {
-//							sana = sana.replaceAll("(.*[\\.-][^\\.-]*[^\\|\\&])(\\(.*\\))(.*)", "$1$3");
-//						}
-//					}
-//					if (sana.matches(".*[^\\|\\&]\\(.*\\).*") && !tester) {
-//						while (sana.matches(".*[^\\|\\&]\\([^\\(\\)]*\\).*")) {
-//							sana = sana.replaceAll("(.*[^\\|\\&])(\\([^\\(\\)]*\\))(.*)","$1$3");
-//						}
-//					}
 
 
 // "Phonetic complements are preceded by a + inside curly brackets (e.g., KUR{+ud} = ikšud)."
 // http://oracc.museum.upenn.edu/doc/help/editinginatf/primer/inlinetutorial/index.html
 					sana = sana.replaceAll("\\+", "");
-// joining characters are combined by + sign, we separate joining chars by replacing with whitespace
-					sana = sana.replaceAll("\\+", " ");
 
-//	For now we would like to preserve curly brackets, so I commented this out.
-//					sana = sana.replaceAll("[-{}]", " ");
 // LAGAŠ = ŠIR.BUR.LA
-					sana = sana.replaceAll("-", " ");
 					sana = sana.replaceAll("lagasz ", "šir bur la ");
+//There are some issues in cases like this: {...}... where the transliteration is being treated as one instead of two separate
+// transliterations. This remedies that by adding a space in between e.g {da}ta -> {da} ta
 					for (String sa : sana.split(" ")) {
 						if (!cuneiMap.containsKey(sa.replaceAll("[\\!\\#\\?\\[\\{\\\\}\\]\\>\\<]", ""))) {
 							sana = sana.replaceAll("([\\w\\!\\?\\#\\}\\]\\)\\>]+)([\\[\\{\\<\\(])", "$1 $2");
@@ -233,12 +196,14 @@ class nuolenna {
 						if (tavu.equals("1/2(iku)") || tavu.equals("1/4(iku)")) {
 							tavu = "";
 						}
+// Checks if there is an ending consisting of the characters #!?.
 						String ending = handleChar(tavu);
 						if (!ending.isEmpty()) {
 							for (String symbol : ending.split("")) {
 								tavu = tavu.replace(symbol, "");
 							}
 						}
+//	If tavu has an x or a ., it is a compound character that needs to be split up. This chunk of code handles that.
 						if ((tavu.contains("x") || tavu.contains(".")) && !tavu.contains("&") && !checks.equals("...")) {
 							tavu = tavu.replaceAll("[\\.]", "x");
 							String[] alatavut = tavu.split("x");
@@ -260,7 +225,7 @@ class nuolenna {
 							}
 							System.out.print(ending);
 						}
-
+//	Checks for parentheses around the transliteration that need to be preserved.
 						else if (tavu.matches("\\A[\\{\\[\\<\\( ]+.*") || tavu.matches(".*[ \\}\\]\\>\\)]+[\\!\\?\\#]*\\z") && !cuneiMap.containsKey(tavu)) {
 							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\<\\( ]*).*?([\\}\\]\\>\\) ]*[\\!\\?\\#]*)\\z");
 							Matcher match = checkParentheses.matcher(tavu);
