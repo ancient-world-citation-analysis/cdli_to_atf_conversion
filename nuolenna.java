@@ -71,7 +71,7 @@ class nuolenna {
 
 //	several modifications are made here in order to split the line into smaller more manageable chunks. All normal
 //	parentheses are removed, as well as dashes and plus signs.
-				line = line.replaceAll("X", "x");
+				line = line.replaceAll("[X×]", "x");
 				line = line.replace("(", "");
 				line = line.replace(")", "");
 				line = line.replace("-", " ");
@@ -131,7 +131,7 @@ class nuolenna {
 // $-sign means that the reading is uncertain (the sign is still certain) so we just remove all dollar signs
 					sana = sana.replaceAll("[\\$]", "");
 // some complicated combination characters have their own sign in UTF, transformations here before removing pipes
-					sana = sana.replaceAll("gad\\&gad\\.gar\\&gar", "kinda");
+//					sana = sana.replaceAll("gad\\&gad\\.gar\\&gar", "kinda");
 					sana = sana.replaceAll("bu\\&bu\\.ab", "sirsir");
 					sana = sana.replaceAll("tur\\&tur\\.za\\&za", "zizna");
 					sana = sana.replaceAll("še\\&še\\.tab\\&tab.gar\\&gar", "garadin3");
@@ -183,7 +183,7 @@ class nuolenna {
 						}
 
 //	If tavu has an x or a ., it is a compound character that needs to be split up. This chunk of code handles that.
-						if ((tavu.contains("x") || tavu.contains(".")) && !tavu.contains("&") && !checks.equals("...")) {
+						if ((tavu.contains("x") || tavu.contains(".")) && !tavu.contains("&") && !checks.equals("...") && !contain) {
 							tavu = tavu.replaceAll("[\\.]", "x");
 							String[] alatavut = tavu.split("x");
 							for (String alatavu: alatavut) {
@@ -251,17 +251,13 @@ class nuolenna {
 				translitteraatio = translitteraatio.toLowerCase();
 				String nuolenpaa = line.replaceAll(".*\t", "");
 // We'll change all combination signs to just signs following each other
-//				nuolenpaa = nuolenpaa.replaceAll("x", "");
 				nuolenpaa = nuolenpaa.replaceAll("[xX×]", "x");
-//				nuolenpaa = nuolenpaa.replaceAll("\\.", "");
 
 // We make substitutions to conform to our desired format(convert subscripts to integers, replace accents)
 				translitteraatio = translitteraatio.replace("|", "");
-				translitteraatio = translitteraatio.replace("&", " ");
 				translitteraatio = translitteraatio.replace("š", "sz");
-				translitteraatio = translitteraatio.replace("×", "");
-				translitteraatio = translitteraatio.replace("X", "x");
 				translitteraatio = translitteraatio.replace("×", "x");
+				translitteraatio = translitteraatio.replace("X", "x");
 				translitteraatio = translitteraatio.replace("ṭ", "t,");
 				translitteraatio = translitteraatio.replace("ₓ", "x");
 				translitteraatio = translitteraatio.replace("ṣ", "s,");
@@ -278,11 +274,9 @@ class nuolenna {
 				translitteraatio = translitteraatio.replace("₇", "7");
 				translitteraatio = translitteraatio.replace("₈", "8");
 				translitteraatio = translitteraatio.replace("₉", "9");
-				translitteraatio = translitteraatio.replace(".", "");
 				translitteraatio = translitteraatio.replace("ś", "s'");
 				translitteraatio = translitteraatio.replace("Ś", "s'");
 				translitteraatio = translitteraatio.replace("ʾ", "");
-				translitteraatio = translitteraatio.replace(".", " ");
 				translitteraatio = translitteraatio.replace("'", " ");
 				translitteraatio = translitteraatio.replaceAll("[\\(\\)]", "");
 
