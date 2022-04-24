@@ -99,10 +99,10 @@ class nuolenna {
 
 //					Strips sana of all special characters and parntheses to check if there is a key for it in the hashmap.
 					String check = sana.replaceAll("[\\[\\{\\<\\]\\}\\>\\!\\?\\#]", "");
-
+					String checker = check.replaceAll("[\\.x].*", "");
 //	This piece of code handles repetition characters. For example 10(disz) repeats disz 10 times.
 					if (((sana.matches("^[1-90]+\\(.*\\)[\\!\\#\\?]*$") && !cuneiMap.containsKey(sana)) ||
-							sana.matches("^[\\[\\{\\<]*[1-90]+.*[\\]\\}\\>\\!\\?\\#]*$")) && !cuneiMap.containsKey(check)) {
+							sana.matches("^[\\[\\{\\<]*[1-90]+.*[\\]\\}\\>\\!\\?\\#]*$")) && !cuneiMap.containsKey(check) && !cuneiMap.containsKey(checker)) {
 						Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> \\!\\?\\#]*)\\z");
 						Matcher match = checkParentheses.matcher(sana);
 						if (match.find()) {
@@ -114,28 +114,14 @@ class nuolenna {
 							if (!ending.isEmpty()) {
 								sana = sana.replace(ending, "");
 							}
-
 							String merkki = sana.replaceAll("^[1-90]+", "");
-							String leftover = "";
-							if (merkki.contains(".") || merkki.contains("x")) {
-								leftover = merkki.replaceAll(".*[\\.x]", "");
-								merkki = merkki.replaceAll("[\\.x].*", "");
+							int maara = Integer.valueOf(sana.replaceAll("[^\\d]+.*$", ""));
+							sana = merkki;
+							while (maara > 1) {
+								sana = sana + " " + merkki;
+								maara = maara - 1;
 							}
-							String thing = sana.replaceAll("[^\\d]+.*$", "") + merkki;
-							if (!cuneiMap.containsKey(sana.replaceAll("[^\\d]+.*$", "") + merkki)) {
-								int maara = Integer.valueOf(sana.replaceAll("[^\\d]+.*$", ""));
-								sana = merkki;
-								while (maara > 1) {
-									sana = sana + " " + merkki;
-									maara = maara - 1;
-								}
-								if (leftover.isEmpty()) {
-									sana = left + sana + ending + leftover + right;
-								}
-								else {
-									sana = left + sana + ending + " " + leftover + right;
-								}
-							}
+							sana = left + sana + ending + right;
 						}
 					}
 // $-sign means that the reading is uncertain (the sign is still certain) so we just remove all dollar signs
