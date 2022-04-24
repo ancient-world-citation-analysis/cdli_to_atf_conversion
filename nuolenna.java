@@ -95,7 +95,7 @@ class nuolenna {
 					sana = sana.replace("'", " ");
 					sana = sana.replace("|", "");
 
-					sana = sana.toLowerCase();
+					sana = sana.toLowerCase().trim();
 
 //					Strips sana of all special characters and parntheses to check if there is a key for it in the hashmap.
 					String check = sana.replaceAll("[\\[\\{\\<\\]\\}\\>\\!\\?\\#]", "");
@@ -103,7 +103,7 @@ class nuolenna {
 //	This piece of code handles repetition characters. For example 10(disz) repeats disz 10 times.
 					if (((sana.matches("^[1-90]+\\(.*\\)[\\!\\#\\?]*$") && !cuneiMap.containsKey(sana)) ||
 							sana.matches("^[\\[\\{\\<]*[1-90]+.*[\\]\\}\\>\\!\\?\\#]*.*$")) && !cuneiMap.containsKey(check)) {
-						Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> ]*[\\!\\?\\#]*)\\z");
+						Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> \\!\\?\\#]*)\\z");
 						Matcher match = checkParentheses.matcher(sana);
 						if (match.find()) {
 							String left = match.group(1);
@@ -134,9 +134,6 @@ class nuolenna {
 					sana = sana.replaceAll("še\\&še\\.tab\\&tab.gar\\&gar", "garadin3");
 
 
-// "Phonetic complements are preceded by a + inside curly brackets (e.g., KUR{+ud} = ikšud)."
-// http://oracc.museum.upenn.edu/doc/help/editinginatf/primer/inlinetutorial/index.html
-					sana = sana.replaceAll("\\+", "");
 
 // LAGAŠ = ŠIR.BUR.LA
 					sana = sana.replaceAll("lagasz ", "šir bur la ");
@@ -148,7 +145,6 @@ class nuolenna {
 							sana = sana.replaceAll("([\\]\\}\\>\\!\\?\\#])([\\w\\)]+)", "$1 $2");
 						}
 					}
-
 					String[] tavut = sana.split(" ");
 
 					for (String tavu : tavut) {
@@ -196,13 +192,7 @@ class nuolenna {
 						if (tavu.equals("1/2(iku)") || tavu.equals("1/4(iku)")) {
 							tavu = "";
 						}
-// Checks if there is an ending consisting of the characters #!?.
-						String ending = handleChar(tavu);
-						if (!ending.isEmpty()) {
-							for (String symbol : ending.split("")) {
-								tavu = tavu.replace(symbol, "");
-							}
-						}
+
 //	If tavu has an x or a ., it is a compound character that needs to be split up. This chunk of code handles that.
 						if ((tavu.contains("x") || tavu.contains(".")) && !tavu.contains("&") && !checks.equals("...")) {
 							tavu = tavu.replaceAll("[\\.]", "x");
@@ -216,15 +206,16 @@ class nuolenna {
 									char1 = match.group(1);
 									char2 = match.group(2);
 								}
+								String innerEnding = handleChar(alatavu);
 								alatavu = alatavu.replace(char1, "");
 								alatavu = alatavu.replace(char2, "");
-								alatavu = alatavu.replace(ending, "");
+								alatavu = alatavu.replace(innerEnding, "");
 								if (cuneiMap.containsKey(alatavu)) {
 									System.out.print(char1 + cuneiMap.get(alatavu) + char2);
 								}
 							}
-							System.out.print(ending);
 						}
+
 //	Checks for parentheses around the transliteration that need to be preserved.
 						else if (tavu.matches("\\A[\\{\\[\\<\\( ]+.*") || tavu.matches(".*[ \\}\\]\\>\\)]+[\\!\\?\\#]*\\z") && !cuneiMap.containsKey(tavu)) {
 							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\<\\( ]*).*?([\\}\\]\\>\\) ]*[\\!\\?\\#]*)\\z");
@@ -235,7 +226,13 @@ class nuolenna {
 							}
 
 						}
-
+						// Checks if there is an ending consisting of the characters #!?.
+						String ending = handleChar(tavu);
+						if (!ending.isEmpty()) {
+							for (String symbol : ending.split("")) {
+								tavu = tavu.replace(symbol, "");
+							}
+						}
 						if (cuneiMap.containsKey(tavu)) {
 							System.out.print(cuneiMap.get(tavu) + ending);
 						}
