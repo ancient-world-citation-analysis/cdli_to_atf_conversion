@@ -102,7 +102,7 @@ class nuolenna {
 
 //	This piece of code handles repetition characters. For example 10(disz) repeats disz 10 times.
 					if (((sana.matches("^[1-90]+\\(.*\\)[\\!\\#\\?]*$") && !cuneiMap.containsKey(sana)) ||
-							sana.matches("^[\\[\\{\\<]*[1-90]+.*[\\]\\}\\>\\!\\?\\#]*.*$")) && !cuneiMap.containsKey(check)) {
+							sana.matches("^[\\[\\{\\<]*[1-90]+.*[\\]\\}\\>\\!\\?\\#]*$")) && !cuneiMap.containsKey(check)) {
 						Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\< ]*).*?([\\}\\]\\> \\!\\?\\#]*)\\z");
 						Matcher match = checkParentheses.matcher(sana);
 						if (match.find()) {
@@ -114,15 +114,28 @@ class nuolenna {
 							if (!ending.isEmpty()) {
 								sana = sana.replace(ending, "");
 							}
+
 							String merkki = sana.replaceAll("^[1-90]+", "");
-							merkki = merkki.replaceAll("\\)", "");
-							int maara = Integer.valueOf(sana.replaceAll("[^\\d]+.*$", ""));
-							sana = merkki;
-							while (maara > 1) {
-								sana = sana + " " + merkki;
-								maara = maara - 1;
+							String leftover = "";
+							if (merkki.contains(".") || merkki.contains("x")) {
+								leftover = merkki.replaceAll(".*[\\.x]", "");
+								merkki = merkki.replaceAll("[\\.x].*", "");
 							}
-							sana = left + sana + ending + right;
+							String thing = sana.replaceAll("[^\\d]+.*$", "") + merkki;
+							if (!cuneiMap.containsKey(sana.replaceAll("[^\\d]+.*$", "") + merkki)) {
+								int maara = Integer.valueOf(sana.replaceAll("[^\\d]+.*$", ""));
+								sana = merkki;
+								while (maara > 1) {
+									sana = sana + " " + merkki;
+									maara = maara - 1;
+								}
+								if (leftover.isEmpty()) {
+									sana = left + sana + ending + leftover + right;
+								}
+								else {
+									sana = left + sana + ending + " " + leftover + right;
+								}
+							}
 						}
 					}
 // $-sign means that the reading is uncertain (the sign is still certain) so we just remove all dollar signs
@@ -170,7 +183,7 @@ class nuolenna {
 							tavu = tavu.replaceAll("~[abcdefptyv][1234dgpt]?p?", "");
 						}
 // All numbers to one
-						if (tavu.matches("[n][1-90][1-90]*~*.*") || tavu.matches("[1-90][1-90]*~*.*") && !contain) {
+						if (tavu.matches("[n][1-90][1-90]*~*.*") && !contain) {
 							Pattern checkParentheses = Pattern.compile("\\A([\\{\\[\\<\\( ]*).*?([\\}\\]\\>\\) ]*[\\!\\?\\#]*)\\z");
 							Matcher match = checkParentheses.matcher(tavu);
 							tavu = "n01";
@@ -236,8 +249,6 @@ class nuolenna {
 						if (cuneiMap.containsKey(tavu)) {
 							System.out.print(cuneiMap.get(tavu) + ending);
 						}
-
-
 						else if (tavu.equals("€")) {
 							System.out.print("  ");
 						}
