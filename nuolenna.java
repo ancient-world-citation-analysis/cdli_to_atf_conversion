@@ -68,6 +68,7 @@ class nuolenna {
 					System.out.print(line.split(" ")[0]);
 					line = line.replaceAll("^[\\S]+", "");
 				}
+
 //	several modifications are made here in order to split the line into smaller more manageable chunks. All normal
 //	parentheses are removed, as well as dashes and plus signs.
 				line = line.replaceAll("X", "x");
@@ -77,6 +78,8 @@ class nuolenna {
 				line = line.replace("{+", "{");
 				line = line.replace("+", " ");
 				line = line.toLowerCase().trim();
+//There are some issues in cases like this: {...}... where the transliteration is being treated as one instead of two separate
+// transliterations. This remedies that by adding a space in between e.g {da}ta -> {da} ta
 				for (String sa : line.split(" ")) {
 					if (!cuneiMap.containsKey(sa.replaceAll("[\\!\\#\\?\\[\\{\\\\}\\]\\>\\<]", ""))) {
 						line = line.replaceAll("([\\w\\!\\?\\#\\}\\]\\)\\>]+)([\\[\\{\\<\\(])", "$1 $2");
@@ -97,8 +100,9 @@ class nuolenna {
 
 					sana = sana.toLowerCase().trim();
 
-//					Strips sana of all special characters and parntheses to check if there is a key for it in the hashmap.
+//	Strips sana of all special characters and parentheses to check if there is a key for it in the hashmap.
 					String check = sana.replaceAll("[\\[\\{\\<\\]\\}\\>\\!\\?\\#]", "");
+//If sana is a compound character, get the first part of it
 					String checker = check.replaceAll("[\\.x].*", "");
 //	This piece of code handles repetition characters. For example 10(disz) repeats disz 10 times.
 					if (((sana.matches("^[1-90]+\\(.*\\)[\\!\\#\\?]*$") && !cuneiMap.containsKey(sana)) ||
@@ -132,25 +136,17 @@ class nuolenna {
 					sana = sana.replaceAll("tur\\&tur\\.za\\&za", "zizna");
 					sana = sana.replaceAll("še\\&še\\.tab\\&tab.gar\\&gar", "garadin3");
 
-
-
 // LAGAŠ = ŠIR.BUR.LA
 					sana = sana.replaceAll("lagasz ", "šir bur la ");
-//There are some issues in cases like this: {...}... where the transliteration is being treated as one instead of two separate
-// transliterations. This remedies that by adding a space in between e.g {da}ta -> {da} ta
-					for (String sa : sana.split(" ")) {
-						if (!cuneiMap.containsKey(sa.replaceAll("[\\!\\#\\?\\[\\{\\\\}\\]\\>\\<]", ""))) {
-							sana = sana.replaceAll("([\\w\\!\\?\\#\\}\\]\\)\\>]+)([\\[\\{\\<\\(])", "$1 $2");
-							sana = sana.replaceAll("([\\]\\}\\>\\!\\?\\#])([\\w\\)]+)", "$1 $2");
-						}
-					}
+
 					String[] tavut = sana.split(" ");
 
 					for (String tavu : tavut) {
 						String checks = tavu.replaceAll("[\\!\\?\\#\\{\\[\\<\\}\\]\\>]", "");
 						boolean contain = cuneiMap.containsKey(checks);
 						tavu = tavu.toLowerCase().trim();
-// After the characters @ and ~ there is some annotation which should no affect cuneifying, so we just remove it.
+// After the characters @ and ~ there is some annotation which should not affect cuneifying, so we just remove it.
+// Before doing this, we check if there are any significant symbols at the end of the character(eg !,#,?)
 						if (tavu.matches(".*@[19cghknrstvz].*") && !contain) {
 							String ending = handleChar(tavu);
 							tavu = tavu.replaceAll("@.*", "");
@@ -159,12 +155,6 @@ class nuolenna {
 							}
 						}
 
-//	Commenting this out to make some modifications that will allow it to preserve important symbols
-//	at the end of translitertaions, e.g. "#", "*"
-
-//						if (tavu.matches(".*~[abcdefptyv][1234dgpt]?p?")) {
-//							tavu = tavu.replaceAll("~.*", "");
-//						}
 						if (tavu.matches(".*~[abcdefptyv][1234dgpt]?p?.*")) {
 							tavu = tavu.replaceAll("~[abcdefptyv][1234dgpt]?p?", "");
 						}
@@ -205,10 +195,8 @@ class nuolenna {
 									char1 = match.group(1);
 									char2 = match.group(2);
 								}
-								String innerEnding = handleChar(alatavu);
 								alatavu = alatavu.replace(char1, "");
 								alatavu = alatavu.replace(char2, "");
-								alatavu = alatavu.replace(innerEnding, "");
 								if (cuneiMap.containsKey(alatavu)) {
 									System.out.print(char1 + cuneiMap.get(alatavu) + char2);
 								}
